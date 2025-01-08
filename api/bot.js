@@ -8,7 +8,7 @@ const userSessions = {};
 bot.start((ctx) => {
   const userId = ctx.from.id;
   userSessions[userId] = { currentQuestionIndex: 0 };
-  ctx.reply('Привет! Начинаем опрос. Ответь на вопросы!');
+  ctx.reply('Привет! Начинаем опрос!');
   askQuestion(ctx);
 });
 
