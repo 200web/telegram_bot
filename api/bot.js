@@ -17,18 +17,22 @@ function askQuestion(ctx) {
   const session = userSessions[userId];
   const questionData = questions[session.currentQuestionIndex];
 
-  const options = questionData.options.map((option, index) => `${index + 1}. ${option}`).join('\n');
-  
-  ctx.reply(`${questionData.question}\n${options}`);
+  // Отправляем вопрос как опрос (poll)
+  bot.telegram.sendPoll(
+    ctx.chat.id,
+    questionData.question,
+    questionData.options,
+    { is_anonymous: false }
+  );
 }
 
-bot.on('text', (ctx) => {
+bot.on('poll_answer', (ctx) => {
   const userId = ctx.from.id;
   const session = userSessions[userId];
   const questionData = questions[session.currentQuestionIndex];
-  const userAnswer = ctx.message.text.trim();
+  const userAnswer = ctx.pollAnswer.option_ids[0]; // Получаем ответ пользователя
 
-  if (userAnswer === questionData.correctAnswer) {
+  if (questionData.options[userAnswer] === questionData.correctAnswer) {
     ctx.reply('Правильный ответ! Переходим к следующему вопросу.');
     session.currentQuestionIndex += 1;
 
