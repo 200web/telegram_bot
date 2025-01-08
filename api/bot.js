@@ -9,7 +9,11 @@ bot.start((ctx) => {
   const userId = ctx.from.id;
   userSessions[userId] = { currentQuestionIndex: 0 };
   ctx.reply('Привет! Начинаем опрос!');
-  askQuestion(ctx);
+
+  // Задержка 2 секунды перед отправкой первого вопроса
+  setTimeout(() => {
+    askQuestion(ctx);
+  }, 2000);
 });
 
 function askQuestion(ctx) {
@@ -37,14 +41,20 @@ bot.on('poll_answer', (ctx) => {
     session.currentQuestionIndex += 1;
 
     if (session.currentQuestionIndex < questions.length) {
-      askQuestion(ctx);
+      // Задержка 2 секунды перед отправкой следующего вопроса
+      setTimeout(() => {
+        askQuestion(ctx);
+      }, 2000);
     } else {
       ctx.reply('Поздравляю, ты прошел опрос!');
       delete userSessions[userId];
     }
   } else {
     ctx.reply('Неверный ответ. Попробуй снова.');
-    askQuestion(ctx);
+    // Задержка 2 секунды перед повторной отправкой того же вопроса
+    setTimeout(() => {
+      askQuestion(ctx);
+    }, 2000);
   }
 });
 
