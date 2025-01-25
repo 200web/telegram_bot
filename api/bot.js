@@ -71,9 +71,8 @@ function askQuestion(ctx) {
 }
 
 // Обработчик ответа на опрос
-// Обработчик ответа на опрос
 bot.on('poll_answer', (ctx) => {
-  const userId = ctx.from.id;
+  const userId = ctx.update.poll_answer.user.id;
   const session = userSessions[userId];
 
   if (!session) {
@@ -83,7 +82,7 @@ bot.on('poll_answer', (ctx) => {
 
   const questionIndex = session.currentQuestionIndex;
   const questionData = questions[questionIndex];
-  const userAnswer = ctx.pollAnswer.option_ids[0];
+  const userAnswer = ctx.update.poll_answer.option_ids[0];
 
   if (!questionData) {
     console.error('Question data not found for index:', questionIndex);
@@ -94,40 +93,25 @@ bot.on('poll_answer', (ctx) => {
 
   if (questionData.options[userAnswer] === questionData.correctAnswer) {
     // Правильный ответ
-    ctx.answerPoll(ctx.pollAnswer.poll_id, { option_ids: [userAnswer] })
-      .then(() => {
-        ctx.reply('Correct answer! Moving to the next question.');
-        session.currentQuestionIndex += 1;
+    ctx.reply('Correct answer! Moving to the next question.');
+    session.currentQuestionIndex += 1;
 
-        if (session.currentQuestionIndex < questions.length) {
-          setTimeout(() => {
-            askQuestion(ctx);
-          }, 2000);
-        } else {
-          ctx.reply('Congratulations, you have completed the quiz!');
-          delete userSessions[userId];
-        }
-      })
-      .catch((error) => {
-        console.error('Error answering poll:', error);
-        ctx.reply('Failed to process the answer. Please try again later.');
-      });
+    if (session.currentQuestionIndex < questions.length) {
+      setTimeout(() => {
+        askQuestion(ctx);
+      }, 2000);
+    } else {
+      ctx.reply('Congratulations, you have completed the quiz!');
+      delete userSessions[userId];
+    }
   } else {
     // Неправильный ответ
-    ctx.answerPoll(ctx.pollAnswer.poll_id, { option_ids: [userAnswer] })
-      .then(() => {
-        ctx.reply('Wrong answer. Try again.');
-        setTimeout(() => {
-          askQuestion(ctx);
-        }, 2000);
-      })
-      .catch((error) => {
-        console.error('Error answering poll:', error);
-        ctx.reply('Failed to process the answer. Please try again later.');
-      });
+    ctx.reply('Wrong answer. Try again.');
+    setTimeout(() => {
+      askQuestion(ctx);
+    }, 2000);
   }
 });
-
 
 // Запуск бота
 bot.launch().then(() => {
