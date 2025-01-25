@@ -2,26 +2,33 @@ console.log('Бот запускается...');
 
 import { Telegraf } from 'telegraf';
 import { questions } from '../data/questions.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
-const bot = new Telegraf(process.env.BOT_TOKEN);
+const bot = new Telegraf("7705319594:AAHAiDjUyBiWRaT4R1FZecfSJBatGfNuNe4");
 
 const userSessions = {};
 console.log('Проверка...');
-bot.start((ctx) => {
-  const userId = ctx.from.id;
-  userSessions[userId] = { currentQuestionIndex: 0 };
-  console.log('Команда /start получена');
-  ctx.reply('Welcome! Let\'s start the quiz.');
 
-  // Проверяем, что вопросы есть
-  if (questions.length > 0) {
-    setTimeout(() => {
-      console.log('Отправляем первый вопрос');
-      askQuestion(ctx);
-    }, 1000);
-  } else {
-    ctx.reply('No questions available. Please check the configuration.');
-    console.error('Questions array is empty.');
+bot.start((ctx) => {
+  try {
+    const userId = ctx.from.id;
+    userSessions[userId] = { currentQuestionIndex: 0 };
+    console.log('Команда /start получена');
+    ctx.reply('Welcome! Let\'s start the quiz.');
+
+    // Проверяем, что вопросы есть
+    if (questions.length > 0) {
+      setTimeout(() => {
+        console.log('Отправляем первый вопрос');
+        askQuestion(ctx);
+      }, 1000);
+    } else {
+      ctx.reply('No questions available. Please check the configuration.');
+      console.error('Questions array is empty.');
+    }
+  } catch (error) {
+    console.error('Ошибка при обработке команды /start:', error);
   }
 });
 
@@ -44,6 +51,13 @@ function askQuestion(ctx) {
   }
 
   console.log(`Sending question ${questionIndex + 1}: ${questionData.question}`);
+
+  // Убедитесь, что options — это массив строк
+  if (!Array.isArray(questionData.options) || questionData.options.length === 0) {
+    console.error('Invalid options for question:', questionData);
+    ctx.reply('Failed to send the question. Please check the configuration.');
+    return;
+  }
 
   bot.telegram.sendPoll(
     ctx.chat.id,
@@ -76,7 +90,7 @@ bot.on('poll_answer', (ctx) => {
   }
 
   console.log(`User answered question ${questionIndex + 1}:`, questionData.options[userAnswer]);
-
+/// до этого все отправляется
   if (questionData.options[userAnswer] === questionData.correctAnswer) {
     ctx.reply('Correct answer! Moving to the next question.');
     session.currentQuestionIndex += 1;
@@ -95,6 +109,13 @@ bot.on('poll_answer', (ctx) => {
       askQuestion(ctx);
     }, 2000);
   }
+});
+
+// Запуск бота
+bot.launch().then(() => {
+  console.log('Бот запущен и готов к работе!');
+}).catch((error) => {
+  console.error('Ошибка при запуске бота:', error);
 });
 
 export default async function handler(req, res) {
