@@ -1,5 +1,5 @@
 import { Telegraf } from 'telegraf';
-import { questions } from '../data/questions'; // Импорт вопросов
+import { questions } from '../data/questions'; 
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
