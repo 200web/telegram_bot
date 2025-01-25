@@ -5,7 +5,7 @@ import { questions } from '../data/questions.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const bot = new Telegraf(process.env.BOT_TOKEN);
+const bot = new Telegraf("7705319594:AAHAiDjUyBiWRaT4R1FZecfSJBatGfNuNe4");
 
 const userSessions = {};
 console.log('Проверка...');
