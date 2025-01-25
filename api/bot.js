@@ -21,7 +21,7 @@ bot.command('start', async (ctx) => {
     await ctx.reply('Hello! My name is Teo');
     
     // Send a video from Google Drive
-    const videoUrl = 'https://drive.google.com/uc?id=1J-_sJnwLv23SXA6cZHHhrZIfuS9zs725'; // Direct download link
+    const videoUrl = 'https://drive.google.com/uc?export=download&id=1J-_sJnwLv23SXA6cZHHhrZIfuS9zs725'; // Direct download link
     await bot.telegram.sendVideo(chatId, videoUrl);
 
     ctx.reply('Welcome! Let\'s start the quiz.');
