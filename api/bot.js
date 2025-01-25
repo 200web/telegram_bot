@@ -8,7 +8,7 @@ dotenv.config();
 const bot = new Telegraf("7705319594:AAHAiDjUyBiWRaT4R1FZecfSJBatGfNuNe4");
 
 const userSessions = {};
-console.log('Проверка2...');
+console.log('Проверка...');
 
 bot.start((ctx) => {
   try {
@@ -93,7 +93,7 @@ bot.on('poll_answer', (ctx) => {
 
   if (questionData.options[userAnswer] === questionData.correctAnswer) {
     // Правильный ответ
-    ctx.reply('Correct answer! Moving to the next question.');
+    bot.telegram.sendMessage(ctx.update.poll_answer.user.id, 'Correct answer! Moving to the next question.');
     session.currentQuestionIndex += 1;
 
     if (session.currentQuestionIndex < questions.length) {
@@ -101,12 +101,12 @@ bot.on('poll_answer', (ctx) => {
         askQuestion(ctx);
       }, 2000);
     } else {
-      ctx.reply('Congratulations, you have completed the quiz!');
+      bot.telegram.sendMessage(ctx.update.poll_answer.user.id, 'Congratulations, you have completed the quiz!');
       delete userSessions[userId];
     }
   } else {
     // Неправильный ответ
-    ctx.reply('Wrong answer. Try again.');
+    bot.telegram.sendMessage(ctx.update.poll_answer.user.id, 'Wrong answer. Try again.');
     setTimeout(() => {
       askQuestion(ctx);
     }, 2000);
