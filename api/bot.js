@@ -10,12 +10,20 @@ const bot = new Telegraf("7705319594:AAHAiDjUyBiWRaT4R1FZecfSJBatGfNuNe4");
 const userSessions = {};
 console.log('Проверка...');
 
-bot.start((ctx) => {
+bot.command('start', async (ctx) => {
   try {
     const userId = ctx.from.id;
     const chatId = ctx.chat.id;
     userSessions[userId] = { currentQuestionIndex: 0 };
     console.log('Команда /start получена');
+    
+    // Send a greeting message
+    await ctx.reply('Hello! My name is Teo');
+    
+    // Send a video from Google Drive
+    const videoUrl = 'https://drive.google.com/uc?id=1J-_sJnwLv23SXA6cZHHhrZIfuS9zs725'; // Direct download link
+    await bot.telegram.sendVideo(chatId, videoUrl);
+
     ctx.reply('Welcome! Let\'s start the quiz.');
 
     // Проверяем, что вопросы есть
