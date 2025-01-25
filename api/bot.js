@@ -71,6 +71,7 @@ function askQuestion(ctx) {
 }
 
 // Обработчик ответа на опрос
+// Обработчик ответа на опрос
 bot.on('poll_answer', (ctx) => {
   const userId = ctx.from.id;
   const session = userSessions[userId];
@@ -90,26 +91,43 @@ bot.on('poll_answer', (ctx) => {
   }
 
   console.log(`User answered question ${questionIndex + 1}:`, questionData.options[userAnswer]);
-/// до этого все отправляется
-  if (questionData.options[userAnswer] === questionData.correctAnswer) {
-    ctx.reply('Correct answer! Moving to the next question.');
-    session.currentQuestionIndex += 1;
 
-    if (session.currentQuestionIndex < questions.length) {
-      setTimeout(() => {
-        askQuestion(ctx);
-      }, 2000);
-    } else {
-      ctx.reply('Congratulations, you have completed the quiz!');
-      delete userSessions[userId];
-    }
+  if (questionData.options[userAnswer] === questionData.correctAnswer) {
+    // Правильный ответ
+    ctx.answerPoll(ctx.pollAnswer.poll_id, { option_ids: [userAnswer] })
+      .then(() => {
+        ctx.reply('Correct answer! Moving to the next question.');
+        session.currentQuestionIndex += 1;
+
+        if (session.currentQuestionIndex < questions.length) {
+          setTimeout(() => {
+            askQuestion(ctx);
+          }, 2000);
+        } else {
+          ctx.reply('Congratulations, you have completed the quiz!');
+          delete userSessions[userId];
+        }
+      })
+      .catch((error) => {
+        console.error('Error answering poll:', error);
+        ctx.reply('Failed to process the answer. Please try again later.');
+      });
   } else {
-    ctx.reply('Wrong answer. Try again.');
-    setTimeout(() => {
-      askQuestion(ctx);
-    }, 2000);
+    // Неправильный ответ
+    ctx.answerPoll(ctx.pollAnswer.poll_id, { option_ids: [userAnswer] })
+      .then(() => {
+        ctx.reply('Wrong answer. Try again.');
+        setTimeout(() => {
+          askQuestion(ctx);
+        }, 2000);
+      })
+      .catch((error) => {
+        console.error('Error answering poll:', error);
+        ctx.reply('Failed to process the answer. Please try again later.');
+      });
   }
 });
+
 
 // Запуск бота
 bot.launch().then(() => {
