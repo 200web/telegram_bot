@@ -1,17 +1,17 @@
 export const questions = [
     {
       question: "Я обязательно объясню ему свою позицию.",
-      options: ["I’m likely to explain my position to him.", "I’m sure to explain my position to him."],
+      options: ["I’m likely to explain my position to him", "I’m sure to explain my position to him"],
       correctAnswer: "I’m sure to explain my position to him.",
     },
     {
       question: "Вряд ли он воспримет твои слова всерьез.",
-      options: ["He’s bound to take ur words seriously.", "He’s unlikely to take ur words seriously"],
+      options: ["He’s bound to take ur words seriously", "He’s unlikely to take ur words seriously"],
       correctAnswer: "He’s unlikely to take ur words seriously",
     },
     {
       question: "Я как раз собираюсь обсудить эту тему с тобой.",
-      options: ["I’m about to discuss this topic with u", "I’m supposed to discuss this topic with u."],
+      options: ["I’m about to discuss this topic with u", "I’m supposed to discuss this topic with u"],
       correctAnswer: "I’m about to discuss this topic with u",
     },
     {
