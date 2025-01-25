@@ -2,7 +2,7 @@ export const questions = [
     {
       question: "Я обязательно объясню ему свою позицию.",
       options: ["I’m likely to explain my position to him", "I’m sure to explain my position to him"],
-      correctAnswer: "I’m sure to explain my position to him.",
+      correctAnswer: "I’m sure to explain my position to him",
     },
     {
       question: "Вряд ли он воспримет твои слова всерьез.",
