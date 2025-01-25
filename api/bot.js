@@ -1,20 +1,22 @@
+console.log('Бот запускается...');
+
 import { Telegraf } from 'telegraf';
 import { questions } from '../data/questions.js';
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
 const userSessions = {};
-
-// Команда /start
+console.log('Проверка...');
 bot.start((ctx) => {
   const userId = ctx.from.id;
   userSessions[userId] = { currentQuestionIndex: 0 };
-
+  console.log('Команда /start получена');
   ctx.reply('Welcome! Let\'s start the quiz.');
 
   // Проверяем, что вопросы есть
   if (questions.length > 0) {
     setTimeout(() => {
+      console.log('Отправляем первый вопрос');
       askQuestion(ctx);
     }, 1000);
   } else {
