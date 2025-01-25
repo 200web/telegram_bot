@@ -12,7 +12,7 @@ bot.start((ctx) => {
 
   setTimeout(() => {
     askQuestion(ctx);
-  }, 2000);
+  }, 1);
 });
 
 function askQuestion(ctx) {
