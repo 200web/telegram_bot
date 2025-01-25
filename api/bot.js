@@ -5,54 +5,78 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 
 const userSessions = {};
 
+// Команда /start
 bot.start((ctx) => {
   const userId = ctx.from.id;
   userSessions[userId] = { currentQuestionIndex: 0 };
-  ctx.reply('Welcome! Enter /start to begin the quiz.');
 
-  setTimeout(() => {
-    askQuestion(ctx);
-  }, 1000); // Увеличена задержка
+  ctx.reply('Welcome! Let\'s start the quiz.');
+
+  // Проверяем, что вопросы есть
+  if (questions.length > 0) {
+    setTimeout(() => {
+      askQuestion(ctx);
+    }, 1000);
+  } else {
+    ctx.reply('No questions available. Please check the configuration.');
+    console.error('Questions array is empty.');
+  }
 });
 
+// Функция для отправки вопроса
 function askQuestion(ctx) {
   const userId = ctx.from.id;
   const session = userSessions[userId];
 
-  if (!session || session.currentQuestionIndex >= questions.length) {
-    ctx.reply('Опрос завершен или произошла ошибка.');
+  if (!session) {
+    ctx.reply('Session not found. Please start the quiz again with /start.');
     return;
   }
 
-  const questionData = questions[session.currentQuestionIndex];
+  const questionIndex = session.currentQuestionIndex;
+  const questionData = questions[questionIndex];
+
+  if (!questionData) {
+    ctx.reply('No more questions available.');
+    return;
+  }
+
+  console.log(`Sending question ${questionIndex + 1}: ${questionData.question}`);
 
   bot.telegram.sendPoll(
     ctx.chat.id,
     questionData.question,
     questionData.options,
     { is_anonymous: false }
-  );
+  ).catch((error) => {
+    console.error('Error sending poll:', error);
+    ctx.reply('Failed to send the question. Please try again later.');
+  });
 }
 
+// Обработчик ответа на опрос
 bot.on('poll_answer', (ctx) => {
   const userId = ctx.from.id;
   const session = userSessions[userId];
 
-  if (!session || session.currentQuestionIndex >= questions.length) {
-    ctx.reply('Опрос завершен или произошла ошибка.');
+  if (!session) {
+    console.error('Session not found for user:', userId);
     return;
   }
 
-  const questionData = questions[session.currentQuestionIndex];
+  const questionIndex = session.currentQuestionIndex;
+  const questionData = questions[questionIndex];
   const userAnswer = ctx.pollAnswer.option_ids[0];
 
-  if (userAnswer >= questionData.options.length) {
-    ctx.reply('Произошла ошибка. Попробуйте снова.');
+  if (!questionData) {
+    console.error('Question data not found for index:', questionIndex);
     return;
   }
 
+  console.log(`User answered question ${questionIndex + 1}:`, questionData.options[userAnswer]);
+
   if (questionData.options[userAnswer] === questionData.correctAnswer) {
-    ctx.reply('Правильный ответ! Переходим к следующему вопросу.');
+    ctx.reply('Correct answer! Moving to the next question.');
     session.currentQuestionIndex += 1;
 
     if (session.currentQuestionIndex < questions.length) {
@@ -60,11 +84,11 @@ bot.on('poll_answer', (ctx) => {
         askQuestion(ctx);
       }, 2000);
     } else {
-      ctx.reply('Поздравляю, ты прошел опрос!');
+      ctx.reply('Congratulations, you have completed the quiz!');
       delete userSessions[userId];
     }
   } else {
-    ctx.reply('Неверный ответ. Попробуй снова.');
+    ctx.reply('Wrong answer. Try again.');
     setTimeout(() => {
       askQuestion(ctx);
     }, 2000);
