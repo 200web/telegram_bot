@@ -5,7 +5,7 @@ import { questions } from '../data/questions.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const bot = new Telegraf("7705319594:AAHAiDjUyBiWRaT4R1FZecfSJBatGfNuNe4");
+const bot = new Telegraf(process.env.BOT_TOKEN);
 
 const userSessions = {};
 console.log('Проверка...');
@@ -13,6 +13,7 @@ console.log('Проверка...');
 bot.start((ctx) => {
   try {
     const userId = ctx.from.id;
+    const chatId = ctx.chat.id;
     userSessions[userId] = { currentQuestionIndex: 0 };
     console.log('Команда /start получена');
     ctx.reply('Welcome! Let\'s start the quiz.');
@@ -21,7 +22,7 @@ bot.start((ctx) => {
     if (questions.length > 0) {
       setTimeout(() => {
         console.log('Отправляем первый вопрос');
-        askQuestion(ctx);
+        askQuestion(chatId, userId);
       }, 1000);
     } else {
       ctx.reply('No questions available. Please check the configuration.');
@@ -33,12 +34,11 @@ bot.start((ctx) => {
 });
 
 // Функция для отправки вопроса
-function askQuestion(ctx) {
-  const userId = ctx.from.id;
+function askQuestion(chatId, userId) {
   const session = userSessions[userId];
 
   if (!session) {
-    ctx.reply('Session not found. Please start the quiz again with /start.');
+    bot.telegram.sendMessage(chatId, 'Session not found. Please start the quiz again with /start.');
     return;
   }
 
@@ -46,7 +46,7 @@ function askQuestion(ctx) {
   const questionData = questions[questionIndex];
 
   if (!questionData) {
-    ctx.reply('No more questions available.');
+    bot.telegram.sendMessage(chatId, 'No more questions available.');
     return;
   }
 
@@ -55,18 +55,18 @@ function askQuestion(ctx) {
   // Убедитесь, что options — это массив строк
   if (!Array.isArray(questionData.options) || questionData.options.length === 0) {
     console.error('Invalid options for question:', questionData);
-    ctx.reply('Failed to send the question. Please check the configuration.');
+    bot.telegram.sendMessage(chatId, 'Failed to send the question. Please check the configuration.');
     return;
   }
 
   bot.telegram.sendPoll(
-    ctx.chat.id,
+    chatId,
     questionData.question,
     questionData.options,
     { is_anonymous: false }
   ).catch((error) => {
     console.error('Error sending poll:', error);
-    ctx.reply('Failed to send the question. Please try again later.');
+    bot.telegram.sendMessage(chatId, 'Failed to send the question. Please try again later.');
   });
 }
 
@@ -93,22 +93,22 @@ bot.on('poll_answer', (ctx) => {
 
   if (questionData.options[userAnswer] === questionData.correctAnswer) {
     // Правильный ответ
-    bot.telegram.sendMessage(ctx.update.poll_answer.user.id, 'Correct answer! Moving to the next question.');
+    bot.telegram.sendMessage(userId, 'Correct answer! Moving to the next question.');
     session.currentQuestionIndex += 1;
 
     if (session.currentQuestionIndex < questions.length) {
       setTimeout(() => {
-        askQuestion(ctx);
+        askQuestion(userId, userId);
       }, 2000);
     } else {
-      bot.telegram.sendMessage(ctx.update.poll_answer.user.id, 'Congratulations, you have completed the quiz!');
+      bot.telegram.sendMessage(userId, 'Congratulations, you have completed the quiz!');
       delete userSessions[userId];
     }
   } else {
     // Неправильный ответ
-    bot.telegram.sendMessage(ctx.update.poll_answer.user.id, 'Wrong answer. Try again.');
+    bot.telegram.sendMessage(userId, 'Wrong answer. Try again.');
     setTimeout(() => {
-      askQuestion(ctx);
+      askQuestion(userId, userId);
     }, 2000);
   }
 });
