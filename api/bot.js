@@ -8,7 +8,7 @@ dotenv.config();
 const bot = new Telegraf("7705319594:AAHAiDjUyBiWRaT4R1FZecfSJBatGfNuNe4");
 
 const userSessions = {};
-console.log('Проверка...');
+console.log('Проверка2...');
 
 bot.start((ctx) => {
   try {
