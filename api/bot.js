@@ -8,9 +8,8 @@ const userSessions = {};
 bot.start((ctx) => {
   const userId = ctx.from.id;
   userSessions[userId] = { currentQuestionIndex: 0 };
-  ctx.reply('Привет! Начинаем опрос!');
+  ctx.reply('Welcome! Enter /start to ');
 
-  // Задержка 2 секунды перед отправкой первого вопроса
   setTimeout(() => {
     askQuestion(ctx);
   }, 2000);
