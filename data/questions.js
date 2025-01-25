@@ -32,7 +32,7 @@ export const questions = [
     {
       question: "У тебя меньше шансов убедить его в обратном.",
       options: ["U’re less likely to convince him otherwise", "U’re more likely to convince  him otherwise"],
-      correctAnswer: ".U’re less likely to convince him otherwise",
+      correctAnswer: "U’re less likely to convince him otherwise",
     },
   ];
   

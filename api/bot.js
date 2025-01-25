@@ -8,19 +8,24 @@ const userSessions = {};
 bot.start((ctx) => {
   const userId = ctx.from.id;
   userSessions[userId] = { currentQuestionIndex: 0 };
-  ctx.reply('Welcome! Enter /start to ');
+  ctx.reply('Welcome! Enter /start to begin the quiz.');
 
   setTimeout(() => {
     askQuestion(ctx);
-  }, 1);
+  }, 1000); // Увеличена задержка
 });
 
 function askQuestion(ctx) {
   const userId = ctx.from.id;
   const session = userSessions[userId];
+
+  if (!session || session.currentQuestionIndex >= questions.length) {
+    ctx.reply('Опрос завершен или произошла ошибка.');
+    return;
+  }
+
   const questionData = questions[session.currentQuestionIndex];
 
-  // Отправляем вопрос как опрос (poll)
   bot.telegram.sendPoll(
     ctx.chat.id,
     questionData.question,
@@ -32,15 +37,25 @@ function askQuestion(ctx) {
 bot.on('poll_answer', (ctx) => {
   const userId = ctx.from.id;
   const session = userSessions[userId];
+
+  if (!session || session.currentQuestionIndex >= questions.length) {
+    ctx.reply('Опрос завершен или произошла ошибка.');
+    return;
+  }
+
   const questionData = questions[session.currentQuestionIndex];
-  const userAnswer = ctx.pollAnswer.option_ids[0]; // Получаем ответ пользователя
+  const userAnswer = ctx.pollAnswer.option_ids[0];
+
+  if (userAnswer >= questionData.options.length) {
+    ctx.reply('Произошла ошибка. Попробуйте снова.');
+    return;
+  }
 
   if (questionData.options[userAnswer] === questionData.correctAnswer) {
     ctx.reply('Правильный ответ! Переходим к следующему вопросу.');
     session.currentQuestionIndex += 1;
 
     if (session.currentQuestionIndex < questions.length) {
-      // Задержка 2 секунды перед отправкой следующего вопроса
       setTimeout(() => {
         askQuestion(ctx);
       }, 2000);
@@ -50,7 +65,6 @@ bot.on('poll_answer', (ctx) => {
     }
   } else {
     ctx.reply('Неверный ответ. Попробуй снова.');
-    // Задержка 2 секунды перед повторной отправкой того же вопроса
     setTimeout(() => {
       askQuestion(ctx);
     }, 2000);
