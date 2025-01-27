@@ -1,5 +1,6 @@
 import { Telegraf } from 'telegraf';
 import dotenv from 'dotenv';
+import fs from 'fs';
 dotenv.config();
 
 const bot = new Telegraf("7705319594:AAHAiDjUyBiWRaT4R1FZecfSJBatGfNuNe4");
@@ -18,9 +19,9 @@ bot.command('start', async (ctx) => {
     await ctx.reply('Hello! My name is Teo!');
 
     // Send the video as a document from Google Cloud Storage
-    const videoUrl = 'https://github.com/200web/telegram_bot/raw/refs/heads/main/media/video.mp4'; // Your video URL
-    await ctx.telegram.sendVideo(chatId, videoUrl);
-    
+    const videoPath = './media/video.mp4'; // Path to your video file
+    await ctx.telegram.sendVideo(chatId, { source: fs.createReadStream(videoPath) });
+
     ctx.reply('Welcome! Let\'s start the quiz.');
 
     // Проверяем, что вопросы есть
