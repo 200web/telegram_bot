@@ -10,7 +10,7 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const bot = new Telegraf("7705319594:AAHAiDjUyBiWRaT4R1FZecfSJBatGfNuNe4");
+const bot = new Telegraf(process.env.BOT_TOKEN);
 
 const userSessions = {};
 console.log('Проверка...');
@@ -19,7 +19,7 @@ bot.command('start', async (ctx) => {
   try {
     const userId = ctx.from.id;
     const chatId = ctx.chat.id;
-    userSessions[userId] = { currentQuestionIndex: 0 };
+    userSessions[userId] = { currentQuestionIndex: 0, chatId: chatId };
     console.log('Команда /start получена');
     
     // Send a greeting message
@@ -144,29 +144,29 @@ bot.on('poll_answer', async (ctx) => {
 
   if (questionData.options[userAnswer] === questionData.correctAnswer) {
     // Правильный ответ
-    bot.telegram.sendMessage(userId, 'Correct answer! Moving to the next question.');
+    bot.telegram.sendMessage(session.chatId, 'Correct answer! Moving to the next question.');
     session.currentQuestionIndex += 1;
 
     // Отправка видеокружочка после правильного ответа
-    await sendVideoNoteExplanation(ctx.chat.id, `explanation_${questionIndex + 1}.mp4`);
+    await sendVideoNoteExplanation(session.chatId, `explanation_${questionIndex + 1}.mp4`);
 
     if (session.currentQuestionIndex < questions.length) {
       setTimeout(() => {
-        askQuestion(ctx.chat.id, userId);
+        askQuestion(session.chatId, userId);
       }, 5000); // 5 секунд задержка перед следующим вопросом
     } else {
-      bot.telegram.sendMessage(userId, 'Congratulations, you have completed the quiz!');
+      bot.telegram.sendMessage(session.chatId, 'Congratulations, you have completed the quiz!');
       delete userSessions[userId];
     }
   } else {
     // Неправильный ответ
-    bot.telegram.sendMessage(userId, 'Wrong answer. Try again.');
+    bot.telegram.sendMessage(session.chatId, 'Wrong answer. Try again.');
 
     // Отправка видеокружочка после неправильного ответа
-    await sendVideoNoteExplanation(ctx.chat.id, `explanation_${questionIndex + 1}.mp4`);
+    await sendVideoNoteExplanation(session.chatId, `explanation_${questionIndex + 1}.mp4`);
 
     setTimeout(() => {
-      askQuestion(ctx.chat.id, userId);
+      askQuestion(session.chatId, userId);
     }, 5000); // 5 секунд задержка перед повторным вопросом
   }
 });
