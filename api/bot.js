@@ -16,10 +16,10 @@ bot.command('start', async (ctx) => {
     
     // Send a greeting message
     await ctx.reply('Hello! My name is Teo!');
-    
+
     // Send the video as a document from Google Cloud Storage
     const videoUrl = 'https://storage.googleapis.com/telergam_bot/video.MOV'; // Replace with your actual URL
-    await ctx.telegram.sendDocument(chatId, videoUrl);
+    await ctx.telegram.sendDocument(chatId, { url: videoUrl, filename: 'video.MOV' });
 
     ctx.reply('Welcome! Let\'s start the quiz.');
 
