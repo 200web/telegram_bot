@@ -22,7 +22,7 @@ bot.command('start', async (ctx) => {
     await ctx.reply('Hello! My name is Teo');
     
     // Send a video from Google Drive
-    const videoUrl = 'https://drive.google.com/uc?export=download&id=1Z5Y7K9LLUCb8ag4V1KuMx8uW22YuDBH1'; // Direct download link
+    const videoUrl = 'https://storage.googleapis.com/telergam_bot/video.MOV'; // Direct download link
     await ctx.telegram.sendVideo(chatId, videoUrl);
 
 
