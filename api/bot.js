@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import { questions } from '../data/questions.js'; // Импортируем вопросы
 dotenv.config();
 
 // Получение пути к текущему файлу и директории
@@ -50,10 +51,91 @@ bot.command('start', async (ctx) => {
   }
 });
 
+// Функция для отправки вопроса
+function askQuestion(chatId, userId) {
+  const session = userSessions[userId];
+
+  if (!session) {
+    bot.telegram.sendMessage(chatId, 'Session not found. Please start the quiz again with /start.');
+    return;
+  }
+
+  const questionIndex = session.currentQuestionIndex;
+  const questionData = questions[questionIndex];
+
+  if (!questionData) {
+    bot.telegram.sendMessage(chatId, 'No more questions available.');
+    return;
+  }
+
+  console.log(`Sending question ${questionIndex + 1}: ${questionData.question}`);
+
+  // Убедитесь, что options — это массив строк
+  if (!Array.isArray(questionData.options) || questionData.options.length === 0) {
+    console.error('Invalid options for question:', questionData);
+    bot.telegram.sendMessage(chatId, 'Failed to send the question. Please check the configuration.');
+    return;
+  }
+
+  bot.telegram.sendPoll(
+    chatId,
+    questionData.question,
+    questionData.options,
+    { is_anonymous: false }
+  ).catch((error) => {
+    console.error('Error sending poll:', error);
+    bot.telegram.sendMessage(chatId, 'Failed to send the question. Please try again later.');
+  });
+}
+
 // Обработчик нажатия на кнопку
 bot.action('start_quiz', (ctx) => {
-  ctx.reply('Quiz started!');
-  // Здесь можно добавить логику для начала викторины
+  const userId = ctx.from.id;
+  const chatId = ctx.chat.id;
+  askQuestion(chatId, userId);
+});
+
+// Обработчик ответа на опрос
+bot.on('poll_answer', (ctx) => {
+  const userId = ctx.update.poll_answer.user.id;
+  const session = userSessions[userId];
+
+  if (!session) {
+    console.error('Session not found for user:', userId);
+    return;
+  }
+
+  const questionIndex = session.currentQuestionIndex;
+  const questionData = questions[questionIndex];
+  const userAnswer = ctx.update.poll_answer.option_ids[0];
+
+  if (!questionData) {
+    console.error('Question data not found for index:', questionIndex);
+    return;
+  }
+
+  console.log(`User answered question ${questionIndex + 1}:`, questionData.options[userAnswer]);
+
+  if (questionData.options[userAnswer] === questionData.correctAnswer) {
+    // Правильный ответ
+    bot.telegram.sendMessage(userId, 'Correct answer! Moving to the next question.');
+    session.currentQuestionIndex += 1;
+
+    if (session.currentQuestionIndex < questions.length) {
+      setTimeout(() => {
+        askQuestion(userId, userId);
+      }, 2000);
+    } else {
+      bot.telegram.sendMessage(userId, 'Congratulations, you have completed the quiz!');
+      delete userSessions[userId];
+    }
+  } else {
+    // Неправильный ответ
+    bot.telegram.sendMessage(userId, 'Wrong answer. Try again.');
+    setTimeout(() => {
+      askQuestion(userId, userId);
+    }, 2000);
+  }
 });
 
 // Запуск бота
