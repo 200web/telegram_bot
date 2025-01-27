@@ -22,7 +22,7 @@ bot.command('start', async (ctx) => {
     console.log('Команда /start получена');
     
     // Send a greeting message
-    await ctx.reply('Hello! My name is Teo!');
+    await ctx.reply('Hello! My name is Teo!!');
     
     // Определяем путь к видеофайлу относительно текущей директории
     const videoPath = path.resolve(__dirname, '../media/video.mp4');
