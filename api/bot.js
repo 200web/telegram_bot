@@ -10,7 +10,7 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const bot = new Telegraf("7705319594:AAHAiDjUyBiWRaT4R1FZecfSJBatGfNuNe4");
+const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 
 const userSessions = {};
 console.log('Проверка...');
@@ -91,6 +91,7 @@ function askQuestion(chatId, userId) {
 // Функция для отправки видеокружочка
 async function sendVideoNoteExplanation(chatId, videoFileName) {
   const videoPath = path.resolve(__dirname, `../media/${videoFileName}`);
+  console.log(`Trying to send video note: ${videoPath}`);
 
   // Проверяем, существует ли файл по указанному пути
   if (!fs.existsSync(videoPath)) {
@@ -99,7 +100,12 @@ async function sendVideoNoteExplanation(chatId, videoFileName) {
   }
 
   // Отправка видеокружочка
-  await bot.telegram.sendVideoNote(chatId, { source: fs.createReadStream(videoPath) });
+  try {
+    await bot.telegram.sendVideoNote(chatId, { source: fs.createReadStream(videoPath) });
+    console.log(`Video note sent: ${videoPath}`);
+  } catch (error) {
+    console.error(`Failed to send video note: ${error}`);
+  }
 }
 
 // Обработчик нажатия на кнопку
