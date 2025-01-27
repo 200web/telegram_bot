@@ -88,6 +88,20 @@ function askQuestion(chatId, userId) {
   });
 }
 
+// Функция для отправки видеокружочка
+async function sendVideoNoteExplanation(chatId, videoFileName) {
+  const videoPath = path.resolve(__dirname, `../media/${videoFileName}`);
+
+  // Проверяем, существует ли файл по указанному пути
+  if (!fs.existsSync(videoPath)) {
+    console.error(`Video file not found: ${videoPath}`);
+    return;
+  }
+
+  // Отправка видеокружочка
+  await bot.telegram.sendVideoNote(chatId, { source: fs.createReadStream(videoPath) });
+}
+
 // Обработчик нажатия на кнопку
 bot.action('start_quiz', (ctx) => {
   const userId = ctx.from.id;
@@ -96,7 +110,7 @@ bot.action('start_quiz', (ctx) => {
 });
 
 // Обработчик ответа на опрос
-bot.on('poll_answer', (ctx) => {
+bot.on('poll_answer', async (ctx) => {
   const userId = ctx.update.poll_answer.user.id;
   const session = userSessions[userId];
 
@@ -121,10 +135,13 @@ bot.on('poll_answer', (ctx) => {
     bot.telegram.sendMessage(userId, 'Correct answer! Moving to the next question.');
     session.currentQuestionIndex += 1;
 
+    // Отправка видеокружочка после правильного ответа
+    await sendVideoNoteExplanation(ctx.chat.id, `explanation_${questionIndex + 1}.mp4`);
+
     if (session.currentQuestionIndex < questions.length) {
       setTimeout(() => {
         askQuestion(userId, userId);
-      }, 2000);
+      }, 5000); // 5 секунд задержка перед следующим вопросом
     } else {
       bot.telegram.sendMessage(userId, 'Congratulations, you have completed the quiz!');
       delete userSessions[userId];
@@ -132,9 +149,13 @@ bot.on('poll_answer', (ctx) => {
   } else {
     // Неправильный ответ
     bot.telegram.sendMessage(userId, 'Wrong answer. Try again.');
+
+    // Отправка видеокружочка после неправильного ответа
+    await sendVideoNoteExplanation(ctx.chat.id, `explanation_${questionIndex + 1}.mp4`);
+
     setTimeout(() => {
       askQuestion(userId, userId);
-    }, 2000);
+    }, 5000); // 5 секунд задержка перед повторным вопросом
   }
 });
 
