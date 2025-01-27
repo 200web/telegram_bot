@@ -3,6 +3,7 @@ console.log('Бот запускается...');
 import { Telegraf } from 'telegraf';
 import { questions } from '../data/questions.js';
 import dotenv from 'dotenv';
+
 dotenv.config();
 
 const bot = new Telegraf("7705319594:AAHAiDjUyBiWRaT4R1FZecfSJBatGfNuNe4");
@@ -21,8 +22,9 @@ bot.command('start', async (ctx) => {
     await ctx.reply('Hello! My name is Teo');
     
     // Send a video from Google Drive
-    const videoUrl = 'https://drive.google.com/uc?export=download&id=1J-_sJnwLv23SXA6cZHHhrZIfuS9zs725'; // Direct download link
-    await bot.telegram.sendVideo(chatId, videoUrl);
+    const videoUrl = 'https://drive.google.com/file/d/1Z5Y7K9LLUCb8ag4V1KuMx8uW22YuDBH1/view?usp=sharing'; // Direct download link
+    await ctx.telegram.sendVideo(chatId, videoUrl);
+
 
     ctx.reply('Welcome! Let\'s start the quiz.');
 
