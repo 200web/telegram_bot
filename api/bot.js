@@ -1,9 +1,5 @@
-console.log('Бот запускается...');
-
 import { Telegraf } from 'telegraf';
-import { questions } from '../data/questions.js';
 import dotenv from 'dotenv';
-
 dotenv.config();
 
 const bot = new Telegraf("7705319594:AAHAiDjUyBiWRaT4R1FZecfSJBatGfNuNe4");
@@ -19,12 +15,11 @@ bot.command('start', async (ctx) => {
     console.log('Команда /start получена');
     
     // Send a greeting message
-    await ctx.reply('Hello! My name is Teo');
+    await ctx.reply('Hello! My name is Teo!');
     
-    // Send a video from Google Drive
-    const videoUrl = 'https://storage.googleapis.com/telergam_bot/video.MOV'; // Direct download link
-    await ctx.telegram.sendVideo(chatId, videoUrl);
-
+    // Send the video as a document from Google Cloud Storage
+    const videoUrl = 'https://storage.googleapis.com/telergam_bot/video.MOV'; // Replace with your actual URL
+    await ctx.telegram.sendDocument(chatId, videoUrl);
 
     ctx.reply('Welcome! Let\'s start the quiz.');
 
