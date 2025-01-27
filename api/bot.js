@@ -152,7 +152,7 @@ bot.on('poll_answer', async (ctx) => {
 
     if (session.currentQuestionIndex < questions.length) {
       setTimeout(() => {
-        askQuestion(userId, userId);
+        askQuestion(ctx.chat.id, userId);
       }, 5000); // 5 секунд задержка перед следующим вопросом
     } else {
       bot.telegram.sendMessage(userId, 'Congratulations, you have completed the quiz!');
@@ -166,7 +166,7 @@ bot.on('poll_answer', async (ctx) => {
     await sendVideoNoteExplanation(ctx.chat.id, `explanation_${questionIndex + 1}.mp4`);
 
     setTimeout(() => {
-      askQuestion(userId, userId);
+      askQuestion(ctx.chat.id, userId);
     }, 5000); // 5 секунд задержка перед повторным вопросом
   }
 });
