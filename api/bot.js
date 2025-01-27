@@ -1,6 +1,7 @@
 import { Telegraf } from 'telegraf';
-import dotenv from 'dotenv';
 import fs from 'fs';
+import path from 'path';
+import dotenv from 'dotenv';
 dotenv.config();
 
 const bot = new Telegraf("7705319594:AAHAiDjUyBiWRaT4R1FZecfSJBatGfNuNe4");
@@ -16,12 +17,17 @@ bot.command('start', async (ctx) => {
     console.log('Команда /start получена');
     
     // Send a greeting message
-    await ctx.reply('Hello! My name is Teo!');
+    await ctx.reply('Hello! My name is Teo!!');
 
-    // Send the video as a document from Google Cloud Storage
-    const videoPath = './media/video.mp4'; // Path to your video file
+    const videoPath = path.resolve(__dirname, '../media/video.mp4');
+
+    // Проверяем, существует ли файл по указанному пути
+    if (!fs.existsSync(videoPath)) {
+      throw new Error(`File not found: ${videoPath}`);
+    }
+
+    // Send the video from the local file system
     await ctx.telegram.sendVideo(chatId, { source: fs.createReadStream(videoPath) });
-
     ctx.reply('Welcome! Let\'s start the quiz.');
 
     // Проверяем, что вопросы есть
