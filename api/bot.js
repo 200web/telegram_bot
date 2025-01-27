@@ -10,7 +10,7 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const bot = new Telegraf(process.env.BOT_TOKEN);
+const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 
 const userSessions = {};
 console.log('Проверка...');
@@ -144,30 +144,24 @@ bot.on('poll_answer', async (ctx) => {
 
   if (questionData.options[userAnswer] === questionData.correctAnswer) {
     // Правильный ответ
-    bot.telegram.sendMessage(session.chatId, 'Correct answer! Moving to the next question.');
-    session.currentQuestionIndex += 1;
-
-    // Отправка видеокружочка после правильного ответа
-    await sendVideoNoteExplanation(session.chatId, `explanation_${questionIndex + 1}.mp4`);
-
-    if (session.currentQuestionIndex < questions.length) {
-      setTimeout(() => {
-        askQuestion(session.chatId, userId);
-      }, 5000); // 5 секунд задержка перед следующим вопросом
-    } else {
-      bot.telegram.sendMessage(session.chatId, 'Congratulations, you have completed the quiz!');
-      delete userSessions[userId];
-    }
+    await bot.telegram.sendMessage(session.chatId, '✅ Correct answer!');
   } else {
     // Неправильный ответ
-    bot.telegram.sendMessage(session.chatId, 'Wrong answer. Try again.');
+    await bot.telegram.sendMessage(session.chatId, '❌ Wrong answer.');
+  }
 
-    // Отправка видеокружочка после неправильного ответа
-    await sendVideoNoteExplanation(session.chatId, `explanation_${questionIndex + 1}.mp4`);
+  // Отправка видеокружочка после ответа
+  await sendVideoNoteExplanation(session.chatId, `explanation_${questionIndex + 1}.mp4`);
 
+  // Переход к следующему вопросу
+  session.currentQuestionIndex += 1;
+  if (session.currentQuestionIndex < questions.length) {
     setTimeout(() => {
       askQuestion(session.chatId, userId);
-    }, 5000); // 5 секунд задержка перед повторным вопросом
+    }, 5000); // 5 секунд задержка перед следующим вопросом
+  } else {
+    bot.telegram.sendMessage(session.chatId, 'Congratulations, you have completed the quiz!');
+    delete userSessions[userId];
   }
 });
 
