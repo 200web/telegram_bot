@@ -1,8 +1,13 @@
 import { Telegraf } from 'telegraf';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 dotenv.config();
+
+// Получение пути к текущему файлу и директории
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const bot = new Telegraf("7705319594:AAHAiDjUyBiWRaT4R1FZecfSJBatGfNuNe4");
 
@@ -17,8 +22,9 @@ bot.command('start', async (ctx) => {
     console.log('Команда /start получена');
     
     // Send a greeting message
-    await ctx.reply('Hello! My name is Teo!!');
-
+    await ctx.reply('Hello! My name is Teo!');
+    
+    // Определяем путь к видеофайлу относительно текущей директории
     const videoPath = path.resolve(__dirname, '../media/video.mp4');
 
     // Проверяем, существует ли файл по указанному пути
@@ -28,6 +34,7 @@ bot.command('start', async (ctx) => {
 
     // Send the video from the local file system
     await ctx.telegram.sendVideo(chatId, { source: fs.createReadStream(videoPath) });
+
     ctx.reply('Welcome! Let\'s start the quiz.');
 
     // Проверяем, что вопросы есть
