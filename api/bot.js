@@ -104,7 +104,7 @@ async function sendVideoNoteExplanation(chatId, videoFileName) {
     await bot.telegram.sendVideoNote(chatId, { source: fs.createReadStream(videoPath) });
     console.log(`Video note sent: ${videoPath}`);
   } catch (error) {
-    console.error(`Failed to send video note: ${error}`);
+    console.error(`Failed to send video note: ${error.message}`);
   }
 }
 
@@ -117,7 +117,13 @@ bot.action('start_quiz', (ctx) => {
 
 // Обработчик ответа на опрос
 bot.on('poll_answer', async (ctx) => {
-  const userId = ctx.update.poll_answer.user.id;
+  const pollAnswer = ctx.update.poll_answer;
+  if (!pollAnswer || !pollAnswer.user) {
+    console.error('Poll answer or user is undefined');
+    return;
+  }
+
+  const userId = pollAnswer.user.id;
   const session = userSessions[userId];
 
   if (!session) {
@@ -127,7 +133,7 @@ bot.on('poll_answer', async (ctx) => {
 
   const questionIndex = session.currentQuestionIndex;
   const questionData = questions[questionIndex];
-  const userAnswer = ctx.update.poll_answer.option_ids[0];
+  const userAnswer = pollAnswer.option_ids[0];
 
   if (!questionData) {
     console.error('Question data not found for index:', questionIndex);
