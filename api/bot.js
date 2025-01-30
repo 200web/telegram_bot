@@ -164,9 +164,36 @@ async function collectUserData(ctx, step) {
       `;
       await bot.telegram.sendMessage(ADMIN_TELEGRAM_ID, message);
       
-      // Здесь можно добавить логику для отправки данных в Google Sheets
+      // Отправка данных в Google Sheets
+      await sendToGoogleSheets(userData);
       
       break;
+  }
+}
+
+// Функция для отправки данных в Google Sheets
+async function sendToGoogleSheets(userData) {
+  const scriptUrl = 'https://script.google.com/macros/s/AKfycbzaqXytmj8eG2UgSu_F3XAHZPQXBQWsZDUWebtXIMDhLUZv8lkI5gDbFFSlk_u2Se8I/exec'; // Замените на URL вашего веб-приложения Google Apps Script
+  const payload = {
+    name: userData.name,
+    contact: userData.contact,
+    level: userData.level,
+    goal: userData.goal
+  };
+
+  try {
+    const response = await fetch(scriptUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+    console.log('Data sent to Google Sheets:', result);
+  } catch (error) {
+    console.error('Error sending data to Google Sheets:', error);
   }
 }
 
