@@ -242,7 +242,7 @@ bot.on('poll_answer', async (ctx) => {
       await bot.telegram.sendMessage(session.chatId, 'Теперь давайте соберем немного информации о вас.');
       session.step = 'name';
       collectUserData(ctx, session.step);
-    }, 5000); // 5 секунд задержка перед сообщением о завершении квиза
+    }, 2000); // 5 секунд задержка перед сообщением о завершении квиза
   }
 });
 
