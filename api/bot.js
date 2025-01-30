@@ -128,26 +128,26 @@ async function collectUserData(ctx, step) {
   switch (step) {
     case 'name':
       session.step = 'contact';
-      await ctx.reply('Ваше имя:');
+      await bot.telegram.sendMessage(session.chatId, 'Ваше имя:');
       break;
     case 'contact':
       session.userData = { name: ctx.message.text };
       session.step = 'level';
-      await ctx.reply('Ваши контакты для связи (Telegram/WhatsApp/etc):');
+      await bot.telegram.sendMessage(session.chatId, 'Ваши контакты для связи (Telegram/WhatsApp/etc):');
       break;
     case 'level':
       session.userData.contact = ctx.message.text;
       session.step = 'goal';
-      await ctx.reply('Ваш текущий уровень английского:');
+      await bot.telegram.sendMessage(session.chatId, 'Ваш текущий уровень английского:');
       break;
     case 'goal':
       session.userData.level = ctx.message.text;
       session.step = 'done';
-      await ctx.reply('Цель изучения/улучшения английского:');
+      await bot.telegram.sendMessage(session.chatId, 'Цель изучения/улучшения английского:');
       break;
     case 'done':
       session.userData.goal = ctx.message.text;
-      await ctx.reply('Спасибо за предоставленную информацию!');
+      await bot.telegram.sendMessage(session.chatId, 'Спасибо за предоставленную информацию!');
       session.step = null;
       // Здесь можно добавить логику для отправки данных в Google Sheets и Telegram
       break;
@@ -196,7 +196,7 @@ bot.on('poll_answer', async (ctx) => {
   } else {
     setTimeout(async () => {
       await bot.telegram.sendMessage(session.chatId, 'Congratulations, you have completed the quiz!');
-      await bot.telegram.sendMessage(session.chatId, 'Теперь давайте соберем немного информации о вас.');
+      await bot.telegram.sendMessage(session.chatId, 'Давайте заполним анкету для дальнейшей связи.');
       session.step = 'name';
       collectUserData(ctx, session.step);
     }, 5000); // 5 секунд задержка перед сообщением о завершении квиза
