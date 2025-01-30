@@ -4,6 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { questions } from '../data/questions.js'; // Импортируем вопросы
+import { GoogleSpreadsheet } from 'google-spreadsheet';
 dotenv.config();
 
 // Получение пути к текущему файлу и директории
@@ -14,6 +15,15 @@ const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 
 const userSessions = {};
 console.log('Проверка...');
+
+// Настройка Google Sheets
+const doc = new GoogleSpreadsheet('YOUR_GOOGLE_SHEET_ID'); // замените на ваш ID Google Sheet
+const creds = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'path/to/your/credentials.json'))); // путь к вашему JSON файлу учетных данных
+
+async function accessSpreadsheet() {
+  await doc.useServiceAccountAuth(creds);
+  await doc.loadInfo(); // Загрузить инфо о документе
+}
 
 bot.command('start', async (ctx) => {
   try {
@@ -115,6 +125,54 @@ bot.action('start_quiz', (ctx) => {
   askQuestion(chatId, userId);
 });
 
+// Функция для записи данных в Google Sheets
+async function logToGoogleSheets(userId, userData) {
+  await accessSpreadsheet();
+  const sheet = doc.sheetsByIndex[0]; // Используем первый лист в документе
+  await sheet.addRow(userData);
+}
+
+// Сбор данных анкеты
+async function collectUserData(ctx, step) {
+  const userId = ctx.from.id;
+  const session = userSessions[userId];
+
+  if (!session) {
+    console.error('Session not found for user:', userId);
+    return;
+  }
+
+  switch (step) {
+    case 'name':
+      session.step = 'contact';
+      await ctx.reply('Ваше имя:');
+      break;
+    case 'contact':
+      session.userData = { name: ctx.message.text };
+      session.step = 'level';
+      await ctx.reply('Ваши контакты для связи (Telegram/WhatsApp/etc):');
+      break;
+    case 'level':
+      session.userData.contact = ctx.message.text;
+      session.step = 'goal';
+      await ctx.reply('Ваш текущий уровень английского:');
+      break;
+    case 'goal':
+      session.userData.level = ctx.message.text;
+      session.step = 'done';
+      await ctx.reply('Цель изучения/улучшения английского:');
+      break;
+    case 'done':
+      session.userData.goal = ctx.message.text;
+      session.step = null;
+      // Отправка данных в Google Sheets и Telegram
+      await logToGoogleSheets(userId, session.userData);
+      await bot.telegram.sendMessage(session.chatId, 'Ваши данные успешно отправлены!');
+      delete userSessions[userId];
+      break;
+  }
+}
+
 // Обработчик ответа на опрос
 bot.on('poll_answer', async (ctx) => {
   const pollAnswer = ctx.update.poll_answer;
@@ -142,26 +200,37 @@ bot.on('poll_answer', async (ctx) => {
 
   console.log(`User answered question ${questionIndex + 1}:`, questionData.options[userAnswer]);
 
-  if (questionData.options[userAnswer] === questionData.correctAnswer) {
-    // Правильный ответ
-    await bot.telegram.sendMessage(session.chatId, '✅ Correct answer!');
-  } else {
-    // Неправильный ответ
-    await bot.telegram.sendMessage(session.chatId, '❌ Wrong answer.');
-  }
+  const isCorrect = questionData.options[userAnswer] === questionData.correctAnswer;
+  await bot.telegram.sendMessage(session.chatId, isCorrect ? '✅ Correct answer!' : '❌ Wrong answer.');
+
+  // Запись данных в Google Sheets
+  await logToGoogleSheets(userId, { questionIndex, userAnswer: questionData.options[userAnswer], isCorrect });
 
   // Отправка видеокружочка после ответа
   await sendVideoNoteExplanation(session.chatId, `explanation_${questionIndex + 1}.mp4`);
 
-  // Переход к следующему вопросу
+  // Переход к следующему вопросу или завершение квиза
   session.currentQuestionIndex += 1;
   if (session.currentQuestionIndex < questions.length) {
     setTimeout(() => {
       askQuestion(session.chatId, userId);
     }, 5000); // 5 секунд задержка перед следующим вопросом
   } else {
-    bot.telegram.sendMessage(session.chatId, 'Congratulations, you have completed the quiz!');
-    delete userSessions[userId];
+    setTimeout(async () => {
+      await bot.telegram.sendMessage(session.chatId, 'Congratulations, you have completed the quiz!');
+      await bot.telegram.sendMessage(session.chatId, 'Теперь давайте соберем немного информации о вас.');
+      collectUserData(ctx, 'name');
+    }, 5000); // 5 секунд задержка перед сообщением о завершении квиза
+  }
+});
+
+// Обработчик текстовых сообщений для сбора данных анкеты
+bot.on('text', async (ctx) => {
+  const userId = ctx.from.id;
+  const session = userSessions[userId];
+
+  if (session && session.step) {
+    await collectUserData(ctx, session.step);
   }
 });
 
