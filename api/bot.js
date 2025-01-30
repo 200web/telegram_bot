@@ -12,6 +12,9 @@ const __dirname = path.dirname(__filename);
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 
+// Замените на ваш Telegram ID
+const ADMIN_TELEGRAM_ID = '6455431647';
+
 const userSessions = {};
 console.log('Проверка...');
 
@@ -149,7 +152,20 @@ async function collectUserData(ctx, step) {
       session.userData.goal = ctx.message.text;
       await bot.telegram.sendMessage(session.chatId, 'Спасибо за предоставленную информацию!');
       session.step = null;
-      // Здесь можно добавить логику для отправки данных в Google Sheets и Telegram
+      
+      // Отправка данных в Telegram на ваш аккаунт
+      const userData = session.userData;
+      const message = `
+        Новая анкета:
+        Имя: ${userData.name}
+        Контакты: ${userData.contact}
+        Уровень английского: ${userData.level}
+        Цель: ${userData.goal}
+      `;
+      await bot.telegram.sendMessage(ADMIN_TELEGRAM_ID, message);
+      
+      // Здесь можно добавить логику для отправки данных в Google Sheets
+      
       break;
   }
 }
@@ -196,7 +212,7 @@ bot.on('poll_answer', async (ctx) => {
   } else {
     setTimeout(async () => {
       await bot.telegram.sendMessage(session.chatId, 'Congratulations, you have completed the quiz!');
-      await bot.telegram.sendMessage(session.chatId, 'Давайте заполним анкету для дальнейшей связи.');
+      await bot.telegram.sendMessage(session.chatId, 'Теперь давайте соберем немного информации о вас.');
       session.step = 'name';
       collectUserData(ctx, session.step);
     }, 5000); // 5 секунд задержка перед сообщением о завершении квиза
