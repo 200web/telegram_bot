@@ -25,24 +25,15 @@ bot.command('start', async (ctx) => {
     userSessions[userId] = { currentQuestionIndex: 0, chatId: chatId };
     console.log('Команда /start получена');
     
-    // Send a greeting message
-    await ctx.reply('Hello! My name is Teo!');
-    
-    // Определяем путь к видеофайлу относительно текущей директории
-    const videoPath = path.resolve(__dirname, '../media/video.mp4');
+    // Отправка приветственного сообщения с кнопкой "СМОТРЕТЬ УРОК"
+    await ctx.reply(
+      'Привет, я Тео, приятно видеть тебя на уроке по английскому!',
+      Markup.inlineKeyboard([
+        Markup.button.url('СМОТРЕТЬ УРОК', 'https://www.youtube.com/watch?v=GzvRorsZzcU&ab_channel=HannaTsyhankova')
+      ])
+    );
 
-    // Проверяем, существует ли файл по указанному пути
-    if (!fs.existsSync(videoPath)) {
-      throw new Error(`File not found: ${videoPath}`);
-    }
-
-    // Send the video from the local file system
-    await ctx.telegram.sendVideo(chatId, { source: fs.createReadStream(videoPath) }, {
-        caption: 'Here is your video!',
-        supports_streaming: true
-    });
-
-    // Через 5 секунд отправить сообщение с кнопкой
+    // Через 5 секунд отправить сообщение с кнопкой для начала теста
     setTimeout(async () => {
       await ctx.telegram.sendMessage(chatId, "Let's start the quiz!", Markup.inlineKeyboard([
         Markup.button.callback('ПЕРЕЙТИ К ТЕСТУ', 'start_quiz')
@@ -242,7 +233,7 @@ bot.on('poll_answer', async (ctx) => {
       await bot.telegram.sendMessage(session.chatId, 'Теперь давайте соберем немного информации о вас.');
       session.step = 'name';
       collectUserData(ctx, session.step);
-    }, 2000); // 5 секунд задержка перед сообщением о завершении квиза
+    }, 2000); // 2 секунды задержка перед сообщением о завершении квиза
   }
 });
 
