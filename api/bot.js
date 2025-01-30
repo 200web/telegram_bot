@@ -4,7 +4,6 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { questions } from '../data/questions.js'; // Импортируем вопросы
-import { GoogleSpreadsheet } from 'google-spreadsheet';
 dotenv.config();
 
 // Получение пути к текущему файлу и директории
@@ -15,15 +14,6 @@ const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 
 const userSessions = {};
 console.log('Проверка...');
-
-// Настройка Google Sheets
-const doc = new GoogleSpreadsheet('YOUR_GOOGLE_SHEET_ID'); // замените на ваш ID Google Sheet
-const creds = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'path/to/your/credentials.json'))); // путь к вашему JSON файлу учетных данных
-
-async function accessSpreadsheet() {
-  await doc.useServiceAccountAuth(creds);
-  await doc.loadInfo(); // Загрузить инфо о документе
-}
 
 bot.command('start', async (ctx) => {
   try {
@@ -125,13 +115,6 @@ bot.action('start_quiz', (ctx) => {
   askQuestion(chatId, userId);
 });
 
-// Функция для записи данных в Google Sheets
-async function logToGoogleSheets(userId, userData) {
-  await accessSpreadsheet();
-  const sheet = doc.sheetsByIndex[0]; // Используем первый лист в документе
-  await sheet.addRow(userData);
-}
-
 // Сбор данных анкеты
 async function collectUserData(ctx, step) {
   const userId = ctx.from.id;
@@ -164,11 +147,9 @@ async function collectUserData(ctx, step) {
       break;
     case 'done':
       session.userData.goal = ctx.message.text;
+      await ctx.reply('Спасибо за предоставленную информацию!');
       session.step = null;
-      // Отправка данных в Google Sheets и Telegram
-      await logToGoogleSheets(userId, session.userData);
-      await bot.telegram.sendMessage(session.chatId, 'Ваши данные успешно отправлены!');
-      delete userSessions[userId];
+      // Здесь можно добавить логику для отправки данных в Google Sheets и Telegram
       break;
   }
 }
@@ -203,9 +184,6 @@ bot.on('poll_answer', async (ctx) => {
   const isCorrect = questionData.options[userAnswer] === questionData.correctAnswer;
   await bot.telegram.sendMessage(session.chatId, isCorrect ? '✅ Correct answer!' : '❌ Wrong answer.');
 
-  // Запись данных в Google Sheets
-  await logToGoogleSheets(userId, { questionIndex, userAnswer: questionData.options[userAnswer], isCorrect });
-
   // Отправка видеокружочка после ответа
   await sendVideoNoteExplanation(session.chatId, `explanation_${questionIndex + 1}.mp4`);
 
@@ -219,7 +197,8 @@ bot.on('poll_answer', async (ctx) => {
     setTimeout(async () => {
       await bot.telegram.sendMessage(session.chatId, 'Congratulations, you have completed the quiz!');
       await bot.telegram.sendMessage(session.chatId, 'Теперь давайте соберем немного информации о вас.');
-      collectUserData(ctx, 'name');
+      session.step = 'name';
+      collectUserData(ctx, session.step);
     }, 5000); // 5 секунд задержка перед сообщением о завершении квиза
   }
 });
