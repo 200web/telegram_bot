@@ -34,12 +34,14 @@ bot.command('start', async (ctx) => {
     }
 
     // Отправка приветственного сообщения с фото и кнопкой "СМОТРЕТЬ УРОК"
-    await ctx.telegram.sendPhoto(chatId, { source: fs.createReadStream(photoPath) }, {
-      caption: 'Привет! Я Тео, и у меня есть для тебя классный разбор! 🔥 Сегодня мы освоим несколько крутых конструкций – смотри урок и давай тренироваться!',
-      ...Markup.inlineKeyboard([
-        Markup.button.url('👉 СМОТРЕТЬ УРОК 🎥', 'https://www.youtube.com/watch?v=GzvRorsZzcU&ab_channel=HannaTsyhankova')
-      ])
-    });
+await ctx.telegram.sendPhoto(chatId, { source: fs.createReadStream(photoPath) }, {
+  caption: '*Привет! Я Тео, и у меня есть для тебя классный разбор! 🔥*\n\nСегодня мы освоим несколько крутых конструкций – смотри урок и давай тренироваться!',
+  parse_mode: 'MarkdownV2',
+  ...Markup.inlineKeyboard([
+    Markup.button.url('👉 СМОТРЕТЬ УРОК 🎥', 'https://www.youtube.com/watch?v=GzvRorsZzcU&ab_channel=HannaTsyhankova')
+  ])
+});
+
 
     // Через 5 секунд отправить сообщение с кнопкой для начала теста
     setTimeout(async () => {
