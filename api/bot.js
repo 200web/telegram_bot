@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Используйте переменную окружения для хранения токена вашего бота
-const bot = new Telegraf("7945048692:AAHad-j-a179c71GTrIZ8jkGyqbmj4Prz_8");
+const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN || "7945048692:AAHad-j-a179c71GTrIZ8jkGyqbmj4Prz_8");
 
 // Замените на ваш Telegram ID
 const ADMIN_TELEGRAM_ID = '6455431647';
@@ -39,7 +39,7 @@ bot.command('start', async (ctx) => {
       caption: '<b>Привет! Я Тео, и у меня есть для тебя классный разбор! 🔥</b>\n\nСегодня мы освоим несколько крутых конструкций – смотри урок и давай тренироваться!',
       parse_mode: 'HTML',
       ...Markup.inlineKeyboard([
-        [Markup.button.url('👉 СМОТРЕТЬ УРОК 🎥', 'https://www.youtube.youtube.com/watch?v=GzvRorsZzcU&ab_channel=HannaTsyhankova')],
+        [Markup.button.url('👉 СМОТРЕТЬ УРОК 🎥', 'https://www.youtube.com/watch?v=GzvRorsZzcU&ab_channel=HannaTsyhankova')],
         [Markup.button.callback('👉 ПЕРЕЙТИ К ПРАКТИКЕ ✍️', 'start_quiz')]
       ])
     });
@@ -284,7 +284,7 @@ bot.launch().then(() => {
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
-      await bot.handleUpdate(req.body, res);
+      await bot.handleUpdate(req.body);
       res.status(200).send('OK');
     } catch (error) {
       console.error('Error handling update:', error);
