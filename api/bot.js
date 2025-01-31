@@ -25,13 +25,21 @@ bot.command('start', async (ctx) => {
     userSessions[userId] = { currentQuestionIndex: 0, chatId: chatId };
     console.log('Команда /start получена');
     
-    // Отправка приветственного сообщения с кнопкой "СМОТРЕТЬ УРОК"
-    await ctx.reply(
-      'Привет, я Тео, приятно видеть тебя на уроке по английскому!',
-      Markup.inlineKeyboard([
+    // Определяем путь к изображению относительно текущей директории
+    const photoPath = path.resolve(__dirname, '../media/teo.jpg');
+
+    // Проверяем, существует ли файл по указанному пути
+    if (!fs.existsSync(photoPath)) {
+      throw new Error(`File not found: ${photoPath}`);
+    }
+
+    // Отправка приветственного сообщения с фото и кнопкой "СМОТРЕТЬ УРОК"
+    await ctx.telegram.sendPhoto(chatId, { source: fs.createReadStream(photoPath) }, {
+      caption: 'Привет, я Тео, приятно видеть тебя на уроке по английскому!',
+      ...Markup.inlineKeyboard([
         Markup.button.url('СМОТРЕТЬ УРОК', 'https://www.youtube.com/watch?v=GzvRorsZzcU&ab_channel=HannaTsyhankova')
       ])
-    );
+    });
 
     // Через 5 секунд отправить сообщение с кнопкой для начала теста
     setTimeout(async () => {
