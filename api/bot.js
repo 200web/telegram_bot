@@ -10,6 +10,7 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Используйте переменную окружения для хранения токена вашего бота
 const bot = new Telegraf("7945048692:AAHad-j-a179c71GTrIZ8jkGyqbmj4Prz_8");
 
 // Замените на ваш Telegram ID
@@ -38,7 +39,7 @@ bot.command('start', async (ctx) => {
       caption: '<b>Привет! Я Тео, и у меня есть для тебя классный разбор! 🔥</b>\n\nСегодня мы освоим несколько крутых конструкций – смотри урок и давай тренироваться!',
       parse_mode: 'HTML',
       ...Markup.inlineKeyboard([
-        [Markup.button.url('👉 СМОТРЕТЬ УРОК 🎥', 'https://www.youtube.com/watch?v=GzvRorsZzcU&ab_channel=HannaTsyhankova')],
+        [Markup.button.url('👉 СМОТРЕТЬ УРОК 🎥', 'https://www.youtube.youtube.com/watch?v=GzvRorsZzcU&ab_channel=HannaTsyhankova')],
         [Markup.button.callback('👉 ПЕРЕЙТИ К ПРАКТИКЕ ✍️', 'start_quiz')]
       ])
     });
@@ -269,6 +270,9 @@ bot.on('text', async (ctx) => {
     await collectUserData(ctx, session.step);
   }
 });
+
+// Установите вебхук
+bot.telegram.setWebhook('https://telegram-bot-five-lac.vercel.app/api/bot');
 
 // Запуск бота
 bot.launch().then(() => {
