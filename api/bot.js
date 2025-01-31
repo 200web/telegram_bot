@@ -285,6 +285,7 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     console.log('Получен POST-запрос от Telegram');
     try {
+      console.log('Тело запроса:', req.body);
       await bot.handleUpdate(req.body);
       res.status(200).send('OK');
     } catch (error) {
