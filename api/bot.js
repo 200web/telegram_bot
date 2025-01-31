@@ -26,7 +26,7 @@ bot.command('start', async (ctx) => {
     console.log('Команда /start получена');
     
     // Определяем путь к изображению относительно текущей директории
-    const photoPath = path.resolve(__dirname, '../media/teo.jpg');
+    const photoPath = path.resolve(__dirname, '../media/teo.png');
 
     // Проверяем, существует ли файл по указанному пути
     if (!fs.existsSync(photoPath)) {
