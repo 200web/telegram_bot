@@ -271,8 +271,18 @@ bot.on('text', async (ctx) => {
   }
 });
 
+// Функция для установки вебхука с обработкой ошибок
+async function setWebhookWithRetry() {
+  try {
+    await bot.telegram.setWebhook('https://telegram-bot-five-lac.vercel.app/api/bot');
+    console.log('Webhook установлен');
+  } catch (error) {
+    console.error('Ошибка при установке вебхука:', error);
+  }
+}
+
 // Установите вебхук
-bot.telegram.setWebhook('https://telegram-bot-five-lac.vercel.app/api/bot');
+setWebhookWithRetry();
 
 // Запуск бота
 bot.launch().then(() => {
