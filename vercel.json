@@ -10,6 +10,10 @@
       {
         "src": "/api/bot",
         "dest": "/api/bot.js"
+      },
+      {
+        "src": "/api/(.*)",
+        "dest": "/api/bot.js"
       }
     ]
   }
