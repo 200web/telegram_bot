@@ -10,7 +10,7 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
+const bot = new Telegraf("7945048692:AAHad-j-a179c71GTrIZ8jkGyqbmj4Prz_8");
 
 // Замените на ваш Telegram ID
 const ADMIN_TELEGRAM_ID = '6455431647';
