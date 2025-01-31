@@ -21,10 +21,10 @@ console.log('Проверка...');
 
 bot.command('start', async (ctx) => {
   try {
+    console.log('Команда /start получена от пользователя', ctx.from.id);
     const userId = ctx.from.id;
     const chatId = ctx.chat.id;
     userSessions[userId] = { currentQuestionIndex: 0, chatId: chatId, practiceButtonClicked: false, reminderSent: false };
-    console.log('Команда /start получена');
     
     // Определяем путь к изображению относительно текущей директории
     const photoPath = path.resolve(__dirname, '../media/teo.png');
@@ -57,6 +57,19 @@ bot.command('start', async (ctx) => {
   } catch (error) {
     console.error('Ошибка при обработке команды /start:', error);
   }
+});
+
+// Обработчик нажатия на кнопку
+bot.action('start_quiz', (ctx) => {
+  const userId = ctx.from.id;
+  const chatId = ctx.chat.id;
+
+  // Отметить, что пользователь нажал кнопку "ПЕРЕЙТИ К ПРАКТИКЕ"
+  if (userSessions[userId]) {
+    userSessions[userId].practiceButtonClicked = true;
+  }
+
+  askQuestion(chatId, userId);
 });
 
 // Функция для отправки вопроса
@@ -115,19 +128,6 @@ async function sendVideoNoteExplanation(chatId, videoFileName) {
     console.error(`Failed to send video note: ${error.message}`);
   }
 }
-
-// Обработчик нажатия на кнопку
-bot.action('start_quiz', (ctx) => {
-  const userId = ctx.from.id;
-  const chatId = ctx.chat.id;
-
-  // Отметить, что пользователь нажал кнопку "ПЕРЕЙТИ К ПРАКТИКЕ"
-  if (userSessions[userId]) {
-    userSessions[userId].practiceButtonClicked = true;
-  }
-
-  askQuestion(chatId, userId);
-});
 
 // Сбор данных анкеты
 async function collectUserData(ctx, step) {
@@ -283,6 +283,7 @@ bot.launch().then(() => {
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
+    console.log('Получен POST-запрос от Telegram');
     try {
       await bot.handleUpdate(req.body);
       res.status(200).send('OK');
@@ -291,6 +292,7 @@ export default async function handler(req, res) {
       res.status(500).send('Internal Server Error');
     }
   } else {
+    console.log('Получен неверный метод запроса:', req.method);
     res.status(405).send('Method Not Allowed');
   }
 }
