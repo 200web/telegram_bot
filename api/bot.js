@@ -35,16 +35,16 @@ bot.command('start', async (ctx) => {
 
     // Отправка приветственного сообщения с фото и кнопкой "СМОТРЕТЬ УРОК"
     await ctx.telegram.sendPhoto(chatId, { source: fs.createReadStream(photoPath) }, {
-      caption: 'Привет, я Тео, приятно видеть тебя на уроке по английскому!',
+      caption: 'Привет! Я Тео, и у меня есть для тебя классный разбор! 🔥 Сегодня мы освоим несколько крутых конструкций – смотри урок и давай тренироваться!',
       ...Markup.inlineKeyboard([
-        Markup.button.url('СМОТРЕТЬ УРОК', 'https://www.youtube.com/watch?v=GzvRorsZzcU&ab_channel=HannaTsyhankova')
+        Markup.button.url('👉 СМОТРЕТЬ УРОК 🎥', 'https://www.youtube.com/watch?v=GzvRorsZzcU&ab_channel=HannaTsyhankova')
       ])
     });
 
     // Через 5 секунд отправить сообщение с кнопкой для начала теста
     setTimeout(async () => {
-      await ctx.telegram.sendMessage(chatId, "Let's start the quiz!", Markup.inlineKeyboard([
-        Markup.button.callback('ПЕРЕЙТИ К ТЕСТУ', 'start_quiz')
+      await ctx.telegram.sendMessage(chatId, "Ну что, попробуем в деле? Поехали! 🚀", Markup.inlineKeyboard([
+        Markup.button.callback('👉 ПЕРЕЙТИ К ПРАКТИКЕ ✍️', 'start_quiz')
       ]));
     }, 5000);
 
