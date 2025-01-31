@@ -22,7 +22,7 @@ bot.command('start', async (ctx) => {
   try {
     const userId = ctx.from.id;
     const chatId = ctx.chat.id;
-    userSessions[userId] = { currentQuestionIndex: 0, chatId: chatId };
+    userSessions[userId] = { currentQuestionIndex: 0, chatId: chatId, practiceButtonClicked: false, reminderSent: false };
     console.log('Команда /start получена');
     
     // Определяем путь к изображению относительно текущей директории
@@ -33,22 +33,25 @@ bot.command('start', async (ctx) => {
       throw new Error(`File not found: ${photoPath}`);
     }
 
-    // Отправка приветственного сообщения с фото и кнопкой "СМОТРЕТЬ УРОК"
-await ctx.telegram.sendPhoto(chatId, { source: fs.createReadStream(photoPath) }, {
-  caption: '*Привет! Я Тео, и у меня есть для тебя классный разбор! 🔥*\n\nСегодня мы освоим несколько крутых конструкций – смотри урок и давай тренироваться!',
-  parse_mode: 'MarkdownV2',
-  ...Markup.inlineKeyboard([
-    Markup.button.url('👉 СМОТРЕТЬ УРОК 🎥', 'https://www.youtube.com/watch?v=GzvRorsZzcU&ab_channel=HannaTsyhankova')
-  ])
-});
+    // Отправка приветственного сообщения с фото и кнопками "СМОТРЕТЬ УРОК" и "ПЕРЕЙТИ К ПРАКТИКЕ"
+    await ctx.telegram.sendPhoto(chatId, { source: fs.createReadStream(photoPath) }, {
+      caption: '<b>Привет! Я Тео, и у меня есть для тебя классный разбор! 🔥</b>\n\nСегодня мы освоим несколько крутых конструкций – смотри урок и давай тренироваться!',
+      parse_mode: 'HTML',
+      ...Markup.inlineKeyboard([
+        [Markup.button.url('👉 СМОТРЕТЬ УРОК 🎥', 'https://www.youtube.com/watch?v=GzvRorsZzcU&ab_channel=HannaTsyhankova')],
+        [Markup.button.callback('👉 ПЕРЕЙТИ К ПРАКТИКЕ ✍️', 'start_quiz')]
+      ])
+    });
 
-
-    // Через 5 секунд отправить сообщение с кнопкой для начала теста
+    // Установить таймер на 5 минут для отправки напоминания
     setTimeout(async () => {
-      await ctx.telegram.sendMessage(chatId, "Ну что, попробуем в деле? Поехали! 🚀", Markup.inlineKeyboard([
-        Markup.button.callback('👉 ПЕРЕЙТИ К ПРАКТИКЕ ✍️', 'start_quiz')
-      ]));
-    }, 5000);
+      if (!userSessions[userId].practiceButtonClicked && !userSessions[userId].reminderSent) {
+        await ctx.telegram.sendMessage(chatId, '<b>Ну как, запомнил конструкции?</b>\n\n⬆️Скорее переходи к тесту и применяй свои знания на практике ⬆️', {
+          parse_mode: 'HTML'
+        });
+        userSessions[userId].reminderSent = true; // Отметить, что напоминание было отправлено
+      }
+    }, 300000); // 300000 миллисекунд = 5 минут
 
   } catch (error) {
     console.error('Ошибка при обработке команды /start:', error);
@@ -116,6 +119,12 @@ async function sendVideoNoteExplanation(chatId, videoFileName) {
 bot.action('start_quiz', (ctx) => {
   const userId = ctx.from.id;
   const chatId = ctx.chat.id;
+
+  // Отметить, что пользователь нажал кнопку "ПЕРЕЙТИ К ПРАКТИКЕ"
+  if (userSessions[userId]) {
+    userSessions[userId].practiceButtonClicked = true;
+  }
+
   askQuestion(chatId, userId);
 });
 
@@ -225,26 +234,30 @@ bot.on('poll_answer', async (ctx) => {
 
   console.log(`User answered question ${questionIndex + 1}:`, questionData.options[userAnswer]);
 
-  const isCorrect = questionData.options[userAnswer] === questionData.correctAnswer;
-  await bot.telegram.sendMessage(session.chatId, isCorrect ? '✅ Correct answer!' : '❌ Wrong answer.');
+  const responseMessage = questionData.options[userAnswer] === questionData.correctAnswer
+    ? questionData.correctResponse
+    : questionData.incorrectResponse;
+
+  await bot.telegram.sendMessage(session.chatId, responseMessage);
 
   // Отправка видеокружочка после ответа
   await sendVideoNoteExplanation(session.chatId, `explanation_${questionIndex + 1}.mp4`);
 
-  // Переход к следующему вопросу или завершение квиза
-  session.currentQuestionIndex += 1;
-  if (session.currentQuestionIndex < questions.length) {
-    setTimeout(() => {
+  // Переход к следующему вопросу через 5 секунд после отправки видеокружочка
+  setTimeout(() => {
+    session.currentQuestionIndex += 1;
+    if (session.currentQuestionIndex < questions.length) {
       askQuestion(session.chatId, userId);
-    }, 5000); // 5 секунд задержка перед следующим вопросом
-  } else {
-    setTimeout(async () => {
-      await bot.telegram.sendMessage(session.chatId, 'Congratulations, you have completed the quiz!');
-      await bot.telegram.sendMessage(session.chatId, 'Теперь давайте соберем немного информации о вас.');
-      session.step = 'name';
-      collectUserData(ctx, session.step);
-    }, 2000); // 2 секунды задержка перед сообщением о завершении квиза
-  }
+    } else {
+      setTimeout(async () => {
+        await bot.telegram.sendMessage(session.chatId, '<b>Тест пройден, поздравляем!</b>\n\nТы на правильном пути, давай продолжим 👉🏼 \n\nРасскажи немного о себе, и я подскажу, как тебе выйти на новый уровень в английском 🚀', {
+          parse_mode: 'HTML'
+        });
+        session.step = 'name';
+        collectUserData(ctx, session.step);
+      }, 2000); // 2 секунды задержка перед сообщением о завершении квиза
+    }
+  }, 5000); // 5 секунд задержка перед отправкой следующего вопроса
 });
 
 // Обработчик текстовых сообщений для сбора данных анкеты
