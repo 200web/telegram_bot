@@ -42,7 +42,7 @@ bot.command('start', async (ctx) => {
       parse_mode: 'HTML',
       ...Markup.inlineKeyboard([
         [Markup.button.callback('👉 ПЕРЕЙТИ К ПРАКТИКЕ ✍️', 'start_quiz')],
-        [Markup.button.callback('👉 ЗАПИСАТЬСЯ НА ИНДИВИДУАЛЬНЫЙ УРОК 📚', 'start_registration')]
+        [Markup.button.callback('👉 ИНДИВИДУАЛЬНЫЙ УРОК 📚', 'start_registration')]
       ])
     });
   } catch (error) {
