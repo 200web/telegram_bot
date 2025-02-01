@@ -23,8 +23,6 @@ bot.on('text', (ctx) => {
   }
 });
 
-bot.launch();
-
 // Экспорт обработчика для Vercel
 export default async function handler(req, res) {
   if (req.method === 'POST') {
