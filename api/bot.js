@@ -11,7 +11,7 @@ const __dirname = path.dirname(__filename);
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN || "7705319594:AAHAiDjUyBiWRaT4R1FZecfSJBatGfNuNe4");
 
-const ADMIN_TELEGRAM_ID = 'YOUR_ADMIN_TELEGRAM_ID';
+const ADMIN_TELEGRAM_ID = '6455431647';
 
 const userSessions = {};
 console.log('Проверка...');
@@ -136,7 +136,7 @@ async function collectUserData(ctx, step) {
       break;
     case 'done':
       session.userData.goal = ctx.message.text;
-      await bot.telegram.sendMessage(session.chatId, 'Спасибо за предоставленную информацию!');
+      await bot.telegram.sendMessage(session.chatId, 'Готово! Я свяжусь с вами в ближайшее время 🚀');
       session.step = null;
 
       const userData = session.userData;
