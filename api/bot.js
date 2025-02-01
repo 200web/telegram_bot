@@ -34,7 +34,7 @@ bot.command('start', async (ctx) => {
       parse_mode: 'HTML',
       ...Markup.inlineKeyboard([
         [Markup.button.url('👉 СМОТРЕТЬ УРОК 🎥', 'https://www.youtube.com/watch?v=GzvRorsZzcU&ab_channel=HannaTsyhankova')],
-        [Markup.button.callback('👉 ПЕРЕЙТИ К ПРАКТИКЕ ✍️', 'start_quiz')]
+        // [Markup.button.callback('👉 ПЕРЕЙТИ К ПРАКТИКЕ ✍️', 'start_quiz')]
       ])
     });
   } catch (error) {
