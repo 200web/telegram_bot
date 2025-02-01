@@ -33,8 +33,15 @@ bot.command('start', async (ctx) => {
       caption: '<b>Привет! Я Тео, и у меня есть для тебя классный разбор! 🔥</b>\n\nСегодня мы освоим несколько крутых конструкций – смотри урок и давай тренироваться!',
       parse_mode: 'HTML',
       ...Markup.inlineKeyboard([
-        [Markup.button.url('👉 СМОТРЕТЬ УРОК 🎥', 'https://www.youtube.com/watch?v=GzvRorsZzcU&ab_channel=HannaTsyhankova')],
-        // [Markup.button.callback('👉 ПЕРЕЙТИ К ПРАКТИКЕ ✍️', 'start_quiz')]
+        [Markup.button.url('👉 СМОТРЕТЬ УРОК 🎥', 'https://www.youtube.com/watch?v=GzvRorsZzcU&ab_channel=HannaTsyhankova')]
+      ])
+    });
+
+    // Отправка второго сообщения сразу после первого
+    await ctx.telegram.sendMessage(chatId, 'Смотри урок и скорее возвращайся! Будем практиковаться вместе 🚀', {
+      parse_mode: 'HTML',
+      ...Markup.inlineKeyboard([
+        [Markup.button.callback('👉 ПЕРЕЙТИ К ПРАКТИКЕ ✍️', 'start_quiz')]
       ])
     });
   } catch (error) {
