@@ -2,7 +2,7 @@ import { Telegraf } from 'telegraf';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const bot = new Telegraf("7945048692:AAHad-j-a179c71GTrIZ8jkGyqbmj4Prz_8");
+const bot = new Telegraf("7705319594:AAHAiDjUyBiWRaT4R1FZecfSJBatGfNuNe4");
 
 const userSessions = {};
 
