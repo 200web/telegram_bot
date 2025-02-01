@@ -41,7 +41,8 @@ bot.command('start', async (ctx) => {
     await ctx.telegram.sendMessage(chatId, 'Смотри урок и скорее возвращайся! Будем практиковаться вместе 🚀', {
       parse_mode: 'HTML',
       ...Markup.inlineKeyboard([
-        [Markup.button.callback('👉 ПЕРЕЙТИ К ПРАКТИКЕ ✍️', 'start_quiz')]
+        [Markup.button.callback('👉 ПЕРЕЙТИ К ПРАКТИКЕ ✍️', 'start_quiz')],
+        [Markup.button.callback('👉 ЗАПИСАТЬСЯ НА ИНДИВИДУАЛЬНЫЙ УРОК 📚', 'start_registration')]
       ])
     });
   } catch (error) {
@@ -58,6 +59,17 @@ bot.action('start_quiz', (ctx) => {
   }
 
   askQuestion(chatId, userId);
+});
+
+bot.action('start_registration', (ctx) => {
+  const userId = ctx.from.id;
+  const chatId = ctx.chat.id;
+
+  if (userSessions[userId]) {
+    userSessions[userId].step = 'name';
+  }
+
+  collectUserData(ctx, 'name');
 });
 
 function askQuestion(chatId, userId) {
