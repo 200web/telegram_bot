@@ -3,17 +3,14 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
-import { questions } from '../data/questions.js'; // Импортируем вопросы
+import { questions } from '../data/questions.js';
 dotenv.config();
 
-// Получение пути к текущему файлу и директории
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Используйте переменную окружения для хранения токена вашего бота
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN || "7705319594:AAHAiDjUyBiWRaT4R1FZecfSJBatGfNuNe4");
 
-// Замените на ваш Telegram ID
 const ADMIN_TELEGRAM_ID = 'YOUR_ADMIN_TELEGRAM_ID';
 
 const userSessions = {};
@@ -26,15 +23,12 @@ bot.command('start', async (ctx) => {
     const chatId = ctx.chat.id;
     userSessions[userId] = { currentQuestionIndex: 0, chatId: chatId, practiceButtonClicked: false, reminderSent: false };
 
-    // Определяем путь к изображению относительно текущей директории
     const photoPath = path.resolve(__dirname, '../media/teo.png');
 
-    // Проверяем, существует ли файл по указанному пути
     if (!fs.existsSync(photoPath)) {
       throw new Error(`File not found: ${photoPath}`);
     }
 
-    // Отправка приветственного сообщения с фото и кнопками "СМОТРЕТЬ УРОК" и "ПЕРЕЙТИ К ПРАКТИКЕ"
     await ctx.telegram.sendPhoto(chatId, { source: fs.createReadStream(photoPath) }, {
       caption: '<b>Привет! Я Тео, и у меня есть для тебя классный разбор! 🔥</b>\n\nСегодня мы освоим несколько крутых конструкций – смотри урок и давай тренироваться!',
       parse_mode: 'HTML',
@@ -43,28 +37,15 @@ bot.command('start', async (ctx) => {
         [Markup.button.callback('👉 ПЕРЕЙТИ К ПРАКТИКЕ ✍️', 'start_quiz')]
       ])
     });
-
-    // Установить таймер на 5 минут для отправки напоминания
-    setTimeout(async () => {
-      if (!userSessions[userId].practiceButtonClicked && !userSessions[userId].reminderSent) {
-        await ctx.telegram.sendMessage(chatId, '<b>Ну как, запомнил конструкции?</b>\n\n⬆️Скорее переходи к тесту и применяй свои знания на практике ⬆️', {
-          parse_mode: 'HTML'
-        });
-        userSessions[userId].reminderSent = true; // Отметить, что напоминание было отправлено
-      }
-    }, 300000); // 300000 миллисекунд = 5 минут
-
   } catch (error) {
     console.error('Ошибка при обработке команды /start:', error);
   }
 });
 
-// Обработчик нажатия на кнопку
 bot.action('start_quiz', (ctx) => {
   const userId = ctx.from.id;
   const chatId = ctx.chat.id;
 
-  // Отметить, что пользователь нажал кнопку "ПЕРЕЙТИ К ПРАКТИКЕ"
   if (userSessions[userId]) {
     userSessions[userId].practiceButtonClicked = true;
   }
@@ -72,7 +53,6 @@ bot.action('start_quiz', (ctx) => {
   askQuestion(chatId, userId);
 });
 
-// Функция для отправки вопроса
 function askQuestion(chatId, userId) {
   const session = userSessions[userId];
 
@@ -91,7 +71,6 @@ function askQuestion(chatId, userId) {
 
   console.log(`Sending question ${questionIndex + 1}: ${questionData.question}`);
 
-  // Убедитесь, что options — это массив строк
   if (!Array.isArray(questionData.options) || questionData.options.length === 0) {
     console.error('Invalid options for question:', questionData);
     bot.telegram.sendMessage(chatId, 'Failed to send the question. Please check the configuration.');
@@ -109,18 +88,15 @@ function askQuestion(chatId, userId) {
   });
 }
 
-// Функция для отправки видеокружочка
 async function sendVideoNoteExplanation(chatId, videoFileName) {
   const videoPath = path.resolve(__dirname, `../media/${videoFileName}`);
   console.log(`Trying to send video note: ${videoPath}`);
 
-  // Проверяем, существует ли файл по указанному пути
   if (!fs.existsSync(videoPath)) {
     console.error(`Video file not found: ${videoPath}`);
     return;
   }
 
-  // Отправка видеокружочка
   try {
     await bot.telegram.sendVideoNote(chatId, { source: fs.createReadStream(videoPath) });
     console.log(`Video note sent: ${videoPath}`);
@@ -129,7 +105,6 @@ async function sendVideoNoteExplanation(chatId, videoFileName) {
   }
 }
 
-// Сбор данных анкеты
 async function collectUserData(ctx, step) {
   const userId = ctx.from.id;
   const session = userSessions[userId];
@@ -164,7 +139,6 @@ async function collectUserData(ctx, step) {
       await bot.telegram.sendMessage(session.chatId, 'Спасибо за предоставленную информацию!');
       session.step = null;
 
-      // Отправка данных в Telegram на ваш аккаунт
       const userData = session.userData;
       const message = `
         Новая анкета:
@@ -175,16 +149,14 @@ async function collectUserData(ctx, step) {
       `;
       await bot.telegram.sendMessage(ADMIN_TELEGRAM_ID, message);
 
-      // Отправка данных в Google Sheets
       await sendToGoogleSheets(userData);
 
       break;
   }
 }
 
-// Функция для отправки данных в Google Sheets
 async function sendToGoogleSheets(userData) {
-  const scriptUrl = 'https://script.google.com/macros/s/AKfycbzaqXytmj8eG2UgSu_F3XAHZPQXBQWsZDUWebtXIMDhLUZv8lkI5gDbFFSlk_u2Se8I/exec'; // Замените на URL вашего веб-приложения Google Apps Script
+  const scriptUrl = 'https://script.google.com/macros/s/AKfycbzaqXytmj8eG2UgSu_F3XAHZPQXBQWsZDUWebtXIMDhLUZv8lkI5gDbFFSlk_u2Se8I/exec';
   const payload = {
     name: userData.name,
     contact: userData.contact,
@@ -208,7 +180,6 @@ async function sendToGoogleSheets(userData) {
   }
 }
 
-// Обработчик ответа на опрос
 bot.on('poll_answer', async (ctx) => {
   const pollAnswer = ctx.update.poll_answer;
   if (!pollAnswer || !pollAnswer.user) {
@@ -241,27 +212,20 @@ bot.on('poll_answer', async (ctx) => {
 
   await bot.telegram.sendMessage(session.chatId, responseMessage);
 
-  // Отправка видеокружочка после ответа
   await sendVideoNoteExplanation(session.chatId, `explanation_${questionIndex + 1}.mp4`);
 
-  // Переход к следующему вопросу через 5 секунд после отправки видеокружочка
-  setTimeout(() => {
-    session.currentQuestionIndex += 1;
-    if (session.currentQuestionIndex < questions.length) {
-      askQuestion(session.chatId, userId);
-    } else {
-      setTimeout(async () => {
-        await bot.telegram.sendMessage(session.chatId, '<b>Тест пройден, поздравляем!</b>\n\nТы на правильном пути, давай продолжим 👉🏼 \n\nРасскажи немного о себе, и я подскажу, как тебе выйти на новый уровень в английском 🚀', {
-          parse_mode: 'HTML'
-        });
-        session.step = 'name';
-        collectUserData(ctx, session.step);
-      }, 2000); // 2 секунды задержка перед сообщением о завершении квиза
-    }
-  }, 5000); // 5 секунд задержка перед отправкой следующего вопроса
+  session.currentQuestionIndex += 1;
+  if (session.currentQuestionIndex < questions.length) {
+    askQuestion(session.chatId, userId);
+  } else {
+    await bot.telegram.sendMessage(session.chatId, '<b>Тест пройден, поздравляем!</b>\n\nТы на правильном пути, давай продолжим 👉🏼 \n\nРасскажи немного о себе, и я подскажу, как тебе выйти на новый уровень в английском 🚀', {
+      parse_mode: 'HTML'
+    });
+    session.step = 'name';
+    await collectUserData(ctx, session.step);
+  }
 });
 
-// Обработчик текстовых сообщений для сбора данных анкеты
 bot.on('text', async (ctx) => {
   const userId = ctx.from.id;
   const session = userSessions[userId];
