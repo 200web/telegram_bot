@@ -25,6 +25,20 @@ bot.on('text', (ctx) => {
 
 bot.launch();
 
-// Обработка остановки бота
-process.once('SIGINT', () => bot.stop('SIGINT'));
-process.once('SIGTERM', () => bot.stop('SIGTERM'));
+// Экспорт обработчика для Vercel
+export default async function handler(req, res) {
+  if (req.method === 'POST') {
+    console.log('Получен POST-запрос от Telegram');
+    try {
+      console.log('Тело запроса:', req.body);
+      await bot.handleUpdate(req.body);
+      res.status(200).send('OK');
+    } catch (error) {
+      console.error('Error handling update:', error);
+      res.status(500).send('Internal Server Error');
+    }
+  } else {
+    console.log('Получен неверный метод запроса:', req.method);
+    res.status(405).send('Method Not Allowed');
+  }
+}
