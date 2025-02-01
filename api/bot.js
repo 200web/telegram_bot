@@ -11,10 +11,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Используйте переменную окружения для хранения токена вашего бота
-const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN || "7945048692:AAHad-j-a179c71GTrIZ8jkGyqbmj4Prz_8");
+const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN || "YOUR_BOT_TOKEN");
 
 // Замените на ваш Telegram ID
-const ADMIN_TELEGRAM_ID = '6455431647';
+const ADMIN_TELEGRAM_ID = 'YOUR_ADMIN_TELEGRAM_ID';
 
 const userSessions = {};
 console.log('Проверка...');
@@ -25,7 +25,7 @@ bot.command('start', async (ctx) => {
     const userId = ctx.from.id;
     const chatId = ctx.chat.id;
     userSessions[userId] = { currentQuestionIndex: 0, chatId: chatId, practiceButtonClicked: false, reminderSent: false };
-    
+
     // Определяем путь к изображению относительно текущей директории
     const photoPath = path.resolve(__dirname, '../media/teo.png');
 
@@ -163,7 +163,7 @@ async function collectUserData(ctx, step) {
       session.userData.goal = ctx.message.text;
       await bot.telegram.sendMessage(session.chatId, 'Спасибо за предоставленную информацию!');
       session.step = null;
-      
+
       // Отправка данных в Telegram на ваш аккаунт
       const userData = session.userData;
       const message = `
@@ -174,10 +174,10 @@ async function collectUserData(ctx, step) {
         Цель: ${userData.goal}
       `;
       await bot.telegram.sendMessage(ADMIN_TELEGRAM_ID, message);
-      
+
       // Отправка данных в Google Sheets
       await sendToGoogleSheets(userData);
-      
+
       break;
   }
 }
@@ -274,7 +274,7 @@ bot.on('text', async (ctx) => {
 // Функция для установки вебхука с обработкой ошибок
 async function setWebhookWithRetry() {
   try {
-    await bot.telegram.setWebhook('https://telegram-bot-five-lac.vercel.app/api/bot');
+    await bot.telegram.setWebhook('https://telegram-ojhtwmonw-tsyhankovahs-projects.vercel.app/api/bot');
     console.log('Webhook установлен');
   } catch (error) {
     console.error('Ошибка при установке вебхука:', error);
