@@ -3,7 +3,7 @@ export const questions = [
     question: "1️⃣ Я обязательно объясню ему свою позицию.",
     options: ["I’m likely to explain my position to him", "I’m sure to explain my position to him"],
     correctAnswer: "I’m sure to explain my position to him",
-    correctResponse: "✅ Отлично! Именно так надо спрашивать 🙌🏼",
+    correctResponse: "✅ Отлично!",
     incorrectResponse: "❌ Мимо, но не страшно. Сейчас объясню, почему так нельзя 👉🏼",
   },
   {
