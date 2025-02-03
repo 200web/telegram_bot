@@ -11,7 +11,7 @@ const __dirname = path.dirname(__filename);
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN || "7945048692:AAHad-j-a179c71GTrIZ8jkGyqbmj4Prz_8");
 
-const ADMIN_TELEGRAM_ID = '6455431647';
+const ADMIN_TELEGRAM_ID = '1368374828';
 
 const userSessions = {};
 console.log('Проверка...');
@@ -30,7 +30,7 @@ bot.command('start', async (ctx) => {
     }
 
     await ctx.telegram.sendPhoto(chatId, { source: fs.createReadStream(photoPath) }, {
-      caption: '<b>Привет! Я Тео, и у меня есть для тебя классный разбор! 🔥</b>\n\nСегодня мы освоим несколько крутых конструкций – смотри урок и давай тренироваться!',
+      caption: '<b>Привет 👋🏻 Сегодня мы разберем пару крутых конструкций. </b>\n\nСмотри урок и не забудь пройти тест😉',
       parse_mode: 'HTML',
       ...Markup.inlineKeyboard([
         [Markup.button.url('👉 СМОТРЕТЬ УРОК 🎥', 'https://www.youtube.com/watch?v=GzvRorsZzcU&ab_channel=HannaTsyhankova')]
@@ -41,8 +41,8 @@ bot.command('start', async (ctx) => {
     await ctx.telegram.sendMessage(chatId, 'Смотри урок и скорее возвращайся! Будем практиковаться вместе 🚀', {
       parse_mode: 'HTML',
       ...Markup.inlineKeyboard([
-        [Markup.button.callback('👉 ПЕРЕЙТИ К ПРАКТИКЕ ✍️', 'start_quiz')],
-        [Markup.button.callback('👉 ИНДИВИДУАЛЬНЫЙ УРОК 📚', 'start_registration')]
+        [Markup.button.callback('👉 ПРОЙТИ ТЕСТ ✍️', 'start_quiz')],
+        [Markup.button.callback('👉 АНКЕТА ПРЕДЗАПИСИ 📚', 'start_registration')]
       ])
     });
   } catch (error) {
