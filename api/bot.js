@@ -141,7 +141,7 @@ async function collectUserData(ctx, step) {
     case 'contact':
       session.userData = { name: ctx.message.text };
       session.step = 'level';
-      await bot.telegram.sendMessage(session.chatId, 'Ваши контакты для связи (Telegram/WhatsApp/etc):');
+      await bot.telegram.sendMessage(session.chatId, 'Telegram для связи (номер/ник):');
       break;
     case 'level':
       session.userData.contact = ctx.message.text;
